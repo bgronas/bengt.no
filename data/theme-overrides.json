@@ -1,0 +1,13 @@
+{
+  "theme": "blowfish",
+  "theme_version": "v3.10.0",
+  "theme_commit": "3e4b25c4dc74d4da0e83ce5b6b3ac3850de40072",
+  "overrides": [
+    {
+      "local": "layouts/partials/head.html",
+      "upstream": "themes/blowfish/layouts/partials/head.html",
+      "upstream_sha256": "0cb2e019d90b2f3c28ea481168df112c7a1f41b595bc0eb742cd19ce5bfd3846",
+      "reason": "Processed social images and keywords meta."
+    }
+  ]
+}

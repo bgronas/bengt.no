@@ -1,0 +1,23 @@
+{{- /* Markdown link render hook (replaces the theme's).
+       Relative links are resolved against pages, then bundle resources, then
+       assets. Linking a bundle file is what publishes it: attachments reach
+       the site only when an article links to them. An unresolved relative
+       link fails the build. */ -}}
+{{- $u := urls.Parse .Destination -}}
+{{- $href := $u.String -}}
+{{- if strings.HasPrefix $href "#" -}}
+  {{- $href = printf "%s#%s" .PageInner.RelPermalink $u.Fragment -}}
+{{- else if and $href (not $u.IsAbs) (not (strings.HasPrefix $href "/")) -}}
+  {{- $path := strings.TrimPrefix "./" $u.Path -}}
+  {{- with or (.PageInner.GetPage $path) (.PageInner.Resources.Get $path) (resources.Get $path) -}}
+    {{- $href = .RelPermalink -}}
+    {{- with $u.RawQuery }}{{ $href = printf "%s?%s" $href . }}{{ end -}}
+    {{- with $u.Fragment }}{{ $href = printf "%s#%s" $href . }}{{ end -}}
+  {{- else -}}
+    {{- errorf "Relative link %q in %s does not resolve to a page or a file in the page bundle." .Destination .Page.File.Path -}}
+  {{- end -}}
+{{- end -}}
+{{- $external := in (slice "http" "https") $u.Scheme -}}
+{{- $newTab := and $external (.Page.Params.externalLinkForceNewTab | default (site.Params.article.externalLinkForceNewTab | default false)) -}}
+<a href="{{ $href }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if $newTab }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Text }}</a>
+{{- /* trim */ -}}

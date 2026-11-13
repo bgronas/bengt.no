@@ -1,0 +1,421 @@
+/* bengt.no design layer on top of Blowfish v3.10.0.
+   Colour comes from assets/css/schemes/bengt.css; this file adds typography,
+   the reading measure and the small set of components the local partials use.
+   Tokens are documented in docs/design-system.md. */
+
+:root {
+  --font-sans: "Roboto", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --bn-measure: 72ch;
+  --bn-wide: 96ch;
+  --bn-radius: 0.5rem;
+  --bn-step--1: 0.875rem;
+  --bn-step-0: 1.0625rem;
+  --bn-step-1: 1.25rem;
+  --bn-step-2: 1.5rem;
+  --bn-step-3: 1.9rem;
+  --bn-step-4: clamp(2.1rem, 1.5rem + 2.6vw, 3rem);
+
+  --bn-bg: rgb(var(--color-neutral));
+  --bn-surface: rgb(var(--color-neutral-100));
+  --bn-border: rgb(var(--color-neutral-300));
+  --bn-text: rgb(var(--color-neutral-900));
+  --bn-muted: rgb(var(--color-neutral-600));
+  --bn-accent: rgb(var(--color-primary-700));
+  --bn-accent-strong: rgb(var(--color-primary-800));
+  --bn-code-bg: rgb(var(--color-neutral-100));
+}
+
+html.dark {
+  --bn-bg: rgb(var(--color-neutral-800));
+  --bn-surface: rgb(var(--color-neutral-700));
+  --bn-border: rgb(var(--color-neutral-600));
+  --bn-text: rgb(var(--color-neutral));
+  --bn-muted: rgb(var(--color-neutral-300));
+  --bn-accent: rgb(var(--color-primary-400));
+  --bn-accent-strong: rgb(var(--color-primary-300));
+  --bn-code-bg: rgb(var(--color-neutral-900));
+}
+
+html {
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--bn-step-0);
+  line-height: 1.65;
+}
+
+/* Visible keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--bn-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---------- Header wordmark ---------- */
+
+.main-menu > a.truncate {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--bn-text);
+  overflow: visible;
+}
+
+.main-menu > a.truncate::after {
+  content: "bengt.no";
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--bn-accent);
+}
+
+/* ---------- Homepage ---------- */
+
+.bn-intro {
+  padding-block: clamp(1.5rem, 5vw, 3.5rem) 1.5rem;
+  max-width: var(--bn-measure);
+}
+
+.bn-eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--bn-step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bn-accent);
+}
+
+.bn-wordmark {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  font-size: var(--bn-step-4);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--bn-text);
+}
+
+.bn-signature {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--bn-accent);
+}
+
+.bn-lede {
+  margin: 1rem 0 0;
+  font-size: var(--bn-step-1);
+  line-height: 1.5;
+  color: var(--bn-muted);
+}
+
+.bn-links,
+.bn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bn-links a,
+.bn-chips a,
+.bn-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--bn-border);
+  border-radius: var(--bn-radius);
+  font-size: var(--bn-step--1);
+  font-weight: 500;
+  color: var(--bn-text);
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bn-links a:hover,
+.bn-chips a:hover,
+.bn-button:hover {
+  border-color: var(--bn-accent);
+  color: var(--bn-accent-strong);
+}
+
+.bn-links svg,
+.bn-button svg {
+  width: 1em;
+  height: 1em;
+}
+
+.bn-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--bn-muted);
+}
+
+.bn-topics,
+.bn-featured,
+.bn-recent {
+  margin-top: 2.75rem;
+}
+
+.bn-section-title {
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--bn-border);
+  font-family: var(--font-mono);
+  font-size: var(--bn-step--1);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bn-muted);
+}
+
+.bn-topics .bn-chips {
+  margin-top: 0;
+}
+
+.bn-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bn-empty {
+  margin: 0;
+  color: var(--bn-muted);
+}
+
+.bn-more {
+  margin: 1.5rem 0 0;
+  font-weight: 500;
+}
+
+.bn-more a {
+  color: var(--bn-accent);
+  text-decoration: none;
+}
+
+.bn-more a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 404 ---------- */
+
+.bn-404 {
+  max-width: var(--bn-measure);
+  padding-block: clamp(2rem, 8vw, 5rem);
+}
+
+.bn-404 h1 {
+  margin: 0;
+  font-size: var(--bn-step-4);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+/* ---------- Article typography ---------- */
+
+#single_header,
+.max-w-prose {
+  max-width: var(--bn-measure);
+}
+
+#single_header h1 {
+  font-size: var(--bn-step-4);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.prose {
+  font-size: var(--bn-step-0);
+  line-height: 1.7;
+}
+
+.article-content {
+  max-width: none;
+}
+
+/* Prose keeps the reading measure; code, tables and figures may run wider. */
+.article-content > * {
+  max-width: var(--bn-measure);
+}
+
+.article-content > .highlight-wrapper,
+.article-content > .bn-table,
+.article-content > .bn-figure,
+.article-content > .bn-diagram {
+  max-width: min(var(--bn-wide), 100%);
+}
+
+.prose :where(p):not(:where([class~="not-prose"] *)) {
+  margin-block: 1.15em;
+}
+
+.prose :where(h2):not(:where([class~="not-prose"] *)) {
+  margin-top: 2.2em;
+  margin-bottom: 0.7em;
+  font-size: var(--bn-step-2);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.prose :where(h3):not(:where([class~="not-prose"] *)) {
+  margin-top: 1.8em;
+  font-size: var(--bn-step-1);
+  line-height: 1.3;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+/* ---------- Code ---------- */
+
+.prose :where(code):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  font-weight: 400;
+  font-variant-ligatures: none;
+}
+
+.prose :where(pre):not(:where([class~="not-prose"] *)),
+.highlight pre,
+.highlight .chroma {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  border-radius: var(--bn-radius);
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+  -webkit-overflow-scrolling: touch;
+}
+
+.highlight-wrapper {
+  position: relative;
+  margin-block: 1.5em;
+}
+
+/* ---------- Tables ---------- */
+
+.bn-table {
+  margin-block: 1.75em;
+  overflow-x: auto;
+  border: 1px solid var(--bn-border);
+  border-radius: var(--bn-radius);
+  -webkit-overflow-scrolling: touch;
+}
+
+.bn-table table {
+  width: 100%;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border-collapse: collapse;
+}
+
+.bn-table th,
+.bn-table td {
+  padding: 0.65rem 0.9rem;
+  vertical-align: top;
+  text-align: start;
+}
+
+.bn-table thead th {
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--bn-surface);
+}
+
+/* ---------- Figures and diagrams ---------- */
+
+.bn-figure,
+.bn-diagram {
+  margin-block: 2em;
+  margin-inline: 0;
+}
+
+.bn-figure img,
+.bn-figure picture {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: var(--bn-radius);
+}
+
+.bn-figure figcaption {
+  margin-top: 0.6rem;
+  font-size: var(--bn-step--1);
+  line-height: 1.5;
+  color: var(--bn-muted);
+}
+
+.bn-diagram {
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid var(--bn-border);
+  border-radius: var(--bn-radius);
+}
+
+.bn-diagram pre.mermaid {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  text-align: center;
+  white-space: pre;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--bn-muted);
+}
+
+/* Math rendered at build time. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .bn-links,
+  .bn-topics {
+    display: none;
+  }
+}

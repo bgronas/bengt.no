@@ -1,0 +1,21 @@
+{{- /* Per-page head additions. .WordCount forces the content to render first,
+       so the store flags set by render hooks are available here. */ -}}
+{{- $noop := .WordCount -}}
+{{- $alg := site.Params.fingerprintAlgorithm | default "sha512" -}}
+{{- with site.Params.buildCommit }}
+<meta name="x-content-commit" content="{{ . }}">
+{{- end }}
+{{- if and .IsPage (or .Params.mermaid (.Store.Get "hasMermaid")) (not (.HasShortcode "mermaid")) }}
+  {{- $lib := resources.Get "lib/mermaid/mermaid.min.js" -}}
+  {{- $cfg := resources.Get "js/mermaid.js" | resources.Minify -}}
+  {{- $js := slice $lib $cfg | resources.Concat "js/mermaid.bundle.js" | resources.Fingerprint $alg }}
+<script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{- end }}
+{{- if and .IsPage (or .Params.math (.Store.Get "hasMath")) (not (.HasShortcode "katex")) }}
+  {{- $css := resources.Get "lib/katex/katex.min.css" | resources.Fingerprint $alg }}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+  {{- range resources.Match "lib/katex/fonts/*.woff2" }}{{ $noop = .RelPermalink }}{{ end }}
+{{- end }}
+{{- if and .IsPage (eq .Params.translation.state "machine-draft") }}
+<meta name="robots" content="noindex">
+{{- end }}

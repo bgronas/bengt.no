@@ -1,0 +1,13 @@
+{{- /* Returns featured pages in a deterministic order:
+       featured_weight ascending (missing = 1000), then date descending, then path. */ -}}
+{{- $keyed := slice -}}
+{{- range where .pages "Params.featured" true -}}
+  {{- $w := int (.Params.featured_weight | default 1000) -}}
+  {{- $key := printf "%06d|%020d|%s" $w (sub 99999999999 .Date.Unix) .Path -}}
+  {{- $keyed = $keyed | append (dict "key" $key "page" .) -}}
+{{- end -}}
+{{- $out := slice -}}
+{{- range sort $keyed "key" -}}
+  {{- $out = $out | append .page -}}
+{{- end -}}
+{{- return (first .limit $out) -}}

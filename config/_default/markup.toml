@@ -1,0 +1,33 @@
+# Markdown rendering. Raw HTML in Markdown is disabled (unsafe = false):
+# authors use Markdown, render hooks and shortcodes. See docs/architecture.md.
+
+[goldmark]
+  [goldmark.parser]
+    wrapStandAloneImageWithinParagraph = false
+    autoHeadingID = true
+    autoHeadingIDType = "github"
+    [goldmark.parser.attribute]
+      block = true
+      title = true
+
+  [goldmark.renderer]
+    unsafe = false
+
+  [goldmark.extensions]
+    # Math: block $$...$$ or \[...\], inline \(...\). A single $ is never a
+    # delimiter, so prices such as $50 are plain text.
+    [goldmark.extensions.passthrough]
+      enable = true
+      [goldmark.extensions.passthrough.delimiters]
+        block = [['\[', '\]'], ['$$', '$$']]
+        inline = [['\(', '\)']]
+
+[highlight]
+  noClasses = false
+  lineNos = false
+  tabWidth = 2
+
+[tableOfContents]
+  startLevel = 2
+  endLevel = 4
+  ordered = false

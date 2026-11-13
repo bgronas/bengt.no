@@ -1,0 +1,6 @@
+{{- /* ```mermaid fences become diagrams. The page store flag makes
+       extend-head-uncached.html load the theme's Mermaid bundle on this page only. */ -}}
+{{- .Page.Store.Set "hasMermaid" true -}}
+<figure class="bn-diagram">
+  <pre class="not-prose mermaid" role="img" aria-label="{{ i18n "bn.diagram" }}">{{ .Inner | htmlEscape | safeHTML }}</pre>
+</figure>

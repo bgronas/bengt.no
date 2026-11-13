@@ -1,0 +1,25 @@
+{{- /* Tables scroll horizontally inside their own focusable region, so the
+       page itself never overflows on narrow screens. */ -}}
+<div class="bn-table" role="region" aria-label="{{ i18n "bn.table_region" }}" tabindex="0">
+  <table
+    {{- range $k, $v := .Attributes }}{{ if $v }}{{ printf " %s=%q" $k ($v | transform.HTMLEscape) | safeHTMLAttr }}{{ end }}{{ end }}>
+    <thead>
+      {{- range .THead }}
+      <tr>
+        {{- range . }}
+        <th scope="col"{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</th>
+        {{- end }}
+      </tr>
+      {{- end }}
+    </thead>
+    <tbody>
+      {{- range .TBody }}
+      <tr>
+        {{- range . }}
+        <td{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</td>
+        {{- end }}
+      </tr>
+      {{- end }}
+    </tbody>
+  </table>
+</div>

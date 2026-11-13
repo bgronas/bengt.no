@@ -1,0 +1,26 @@
+# Norwegian Bokmål. The public language key stays "no" (URLs, content/no).
+# locale = "nb" is the Bokmål language tag and is what makes Hugo resolve the
+# theme's i18n/nb.yaml; "nb-NO" does not fall back to it (tested, docs/decisions.md).
+disabled = false
+locale = "nb"
+label = "Norsk bokmål"
+weight = 1
+title = "Bengt Grønås"
+contentDir = "content/no"
+
+[params]
+  displayName = "Norsk"
+  isoCode = "nb"
+  ogLocale = "nb_NO"
+  rtl = false
+  dateFormat = "2. January 2006"
+  description = "Tekniske notater om plattformer, automasjon og drift."
+  signature = "bengt.no"
+
+[params.author]
+  name = "Bengt Grønås"
+  headline = "Tekniske notater om plattformer, automasjon og drift."
+  links = [
+    { github = "https://github.com/bgronas" },
+    { linkedin = "https://linkedin.com/in/bgronas" },
+  ]

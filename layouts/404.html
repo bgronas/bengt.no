@@ -1,0 +1,23 @@
+{{ define "main" }}
+  {{- /* No article titles are listed here: only section-level navigation. */ -}}
+  <section class="bn-404" aria-labelledby="bn-404-title">
+    <p class="bn-eyebrow">404</p>
+    <h1 id="bn-404-title">{{ i18n "bn.not_found_title" }}</h1>
+    <p class="bn-lede">{{ i18n "bn.not_found_text" }}</p>
+    {{- if site.Params.enableSearch }}
+      <p><button type="button" class="bn-button" id="bn-404-search">{{ partial "icon.html" "search" }}<span>{{ i18n "bn.search_site" }}</span></button></p>
+      <script>
+        document.getElementById("bn-404-search").addEventListener("click", function () {
+          var b = document.getElementById("search-button") || document.getElementById("search-button-mobile");
+          if (b) b.click();
+        });
+      </script>
+    {{- end }}
+    <ul class="bn-chips">
+      <li><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></li>
+      {{- range site.Menus.main }}
+        <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+      {{- end }}
+    </ul>
+  </section>
+{{ end }}

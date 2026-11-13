@@ -1,0 +1,67 @@
+{{- /* Homepage: introduction, topics, featured, recent. Uses only data supplied
+       in configuration and front matter. featured: true is the single switch. */ -}}
+{{- $posts := where site.RegularPages "Section" "posts" -}}
+{{- $featured := partial "bn/featured-pages.html" (dict "pages" $posts "limit" (site.Params.homepage.featuredItems | default 3)) -}}
+{{- $recent := $posts | complement $featured | first (site.Params.homepage.showRecentItems | default 6) -}}
+{{- $rss := "" -}}
+{{- with .OutputFormats.Get "RSS" }}{{ $rss = .RelPermalink }}{{ end -}}
+
+<section class="bn-intro" aria-labelledby="bn-intro-title">
+  <p class="bn-eyebrow">{{ i18n "home.intro_label" }}</p>
+  <h1 id="bn-intro-title" class="bn-wordmark">
+    {{ site.Title }}
+    <span class="bn-signature">{{ site.Params.signature | default "bengt.no" }}</span>
+  </h1>
+  <p class="bn-lede">{{ site.Params.description }}</p>
+  <ul class="bn-links">
+    {{- range site.Params.author.links -}}
+      {{- range $name, $url := . }}
+        <li><a href="{{ $url }}" rel="me">{{ partial "icon.html" $name }}<span>{{ index (dict "github" "GitHub" "linkedin" "LinkedIn") $name | default ($name | title) }}</span></a></li>
+      {{- end -}}
+    {{- end }}
+    {{- with $rss }}
+      <li><a href="{{ . }}">{{ partial "icon.html" "rss" }}<span>{{ i18n "home.rss" }}</span></a></li>
+    {{- end }}
+  </ul>
+</section>
+
+<nav class="bn-topics" aria-labelledby="bn-topics-title">
+  <h2 id="bn-topics-title" class="bn-section-title">{{ i18n "home.topics" }}</h2>
+  {{- $terms := site.Taxonomies.categories.Alphabetical -}}
+  {{- if $terms }}
+    <ul class="bn-chips">
+      {{- range $terms }}
+        <li><a href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}<span class="bn-count" aria-hidden="true">{{ .Count }}</span></a></li>
+      {{- end }}
+    </ul>
+  {{- else }}
+    <p class="bn-empty">{{ i18n "home.no_topics" }}</p>
+  {{- end }}
+</nav>
+
+{{- with $featured }}
+  <section class="bn-featured" aria-labelledby="bn-featured-title">
+    <h2 id="bn-featured-title" class="bn-section-title">{{ i18n "home.featured" }}</h2>
+    <div class="bn-rows">
+      {{- range . }}
+        {{ partial "article-link/simple.html" . }}
+      {{- end }}
+    </div>
+  </section>
+{{- end }}
+
+<section class="bn-recent" aria-labelledby="bn-recent-title">
+  <h2 id="bn-recent-title" class="bn-section-title">{{ i18n "home.recent" }}</h2>
+  {{- if $recent }}
+    <div class="bn-rows">
+      {{- range $recent }}
+        {{ partial "article-link/simple.html" . }}
+      {{- end }}
+    </div>
+    {{- with site.GetPage "/posts" }}
+      <p class="bn-more"><a href="{{ .RelPermalink }}">{{ i18n "home.all_articles" }} &rarr;</a></p>
+    {{- end }}
+  {{- else if not $featured }}
+    <p class="bn-empty">{{ i18n "home.empty" }}</p>
+  {{- end }}
+</section>

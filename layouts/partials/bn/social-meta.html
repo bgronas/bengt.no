@@ -1,0 +1,59 @@
+{{- /* Open Graph and Twitter card metadata.
+       og:image is a 1200x630 JPEG derivative of the page's feature image, or the
+       site default PNG. WebP and SVG are never emitted as social images. */ -}}
+{{- $description := .Params.description | default .Params.summary | default site.Params.description -}}
+{{- $isArticle := and .IsPage (eq .Section "posts") -}}
+{{- $social := false -}}
+{{- $alt := .Title -}}
+{{- if .IsPage -}}
+  {{- with partial "bn/feature-resource.html" . -}}
+    {{- if not (eq .MediaType.SubType "svg") -}}
+      {{- with try (.Fill "1200x630 Center jpg q88") -}}
+        {{- with .Value }}{{ $social = . }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $social -}}
+  {{- with site.Params.defaultSocialImage -}}
+    {{- with resources.Get . }}{{ $social = . }}{{ end -}}
+  {{- end -}}
+  {{- $alt = site.Title -}}
+{{- end }}
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ cond .IsHome site.Title (.Title | plainify) }}">
+{{- with $description }}
+<meta property="og:description" content="{{ . | plainify }}">
+{{- end }}
+<meta property="og:locale" content="{{ site.Params.ogLocale | default (replace site.Language.Locale "-" "_") }}">
+{{- range .Translations }}
+<meta property="og:locale:alternate" content="{{ .Site.Params.ogLocale | default (replace .Language.Locale "-" "_") }}">
+{{- end }}
+<meta property="og:type" content="{{ cond $isArticle "article" "website" }}">
+{{- if $isArticle }}
+<meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">
+{{- with index (.Params.categories | default slice) 0 }}
+<meta property="article:section" content="{{ . }}">
+{{- end }}
+{{- range .Params.tags }}
+<meta property="article:tag" content="{{ . }}">
+{{- end }}
+{{- end }}
+{{- with $social }}
+<meta property="og:image" content="{{ .Permalink }}">
+<meta property="og:image:type" content="{{ .MediaType.Type }}">
+<meta property="og:image:width" content="{{ .Width }}">
+<meta property="og:image:height" content="{{ .Height }}">
+<meta property="og:image:alt" content="{{ $alt | plainify }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ .Permalink }}">
+<meta name="twitter:image:alt" content="{{ $alt | plainify }}">
+{{- else }}
+<meta name="twitter:card" content="summary">
+{{- end }}
+<meta name="twitter:title" content="{{ cond .IsHome site.Title (.Title | plainify) }}">
+{{- with $description }}
+<meta name="twitter:description" content="{{ . | plainify }}">
+{{- end }}

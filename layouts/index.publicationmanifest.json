@@ -1,0 +1,16 @@
+{{- /* Raw list of production-eligible posts in this language, exactly as Hugo
+       rendered them. scripts/build_manifest.py merges the languages and adds hashes. */ -}}
+{{- $entries := slice -}}
+{{- range where site.RegularPages "Section" "posts" -}}
+  {{- $entries = $entries | append (dict
+      "lang" .Language.Lang
+      "permalink" .Permalink
+      "content_path" .File.Path
+      "translation_key" .TranslationKey
+      "title" .Title
+      "date" (.Date.Format "2006-01-02T15:04:05Z07:00")
+      "lastmod" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
+      "featured" (eq .Params.featured true)
+    ) -}}
+{{- end -}}
+{{- dict "generator" "hugo" "hugo_version" hugo.Version "lang" site.Language.Lang "pages" $entries | jsonify (dict "indent" "  ") -}}

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" width="960" height="300" role="img" aria-labelledby="t d">
+<title id="t">Publishing pipeline</title>
+<desc id="d">Eight stages from a pushed commit to a deployed site.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2dbeb2"/></marker></defs>
+<rect width="960" height="300" rx="14" fill="#1c1f21"/>
+<path d="M224 76.0H258" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<path d="M464 76.0H498" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<path d="M704 76.0H738" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<path d="M842.0 116V138.0H122.0V158" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<path d="M224 200.0H258" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<path d="M464 200.0H498" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<path d="M704 200.0H738" stroke="#2dbeb2" stroke-width="2" fill="none" marker-end="url(#a)"/>
+<rect x="24" y="40" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="40" y="70" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">1. Push</text>
+<text x="40" y="93" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">commit reaches main</text>
+<rect x="264" y="40" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="280" y="70" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">2. Import</text>
+<text x="280" y="93" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">inbox to page bundle</text>
+<rect x="504" y="40" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="520" y="70" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">3. Enrich</text>
+<text x="520" y="93" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">opted-in metadata</text>
+<rect x="744" y="40" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="760" y="70" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">4. Translate</text>
+<text x="760" y="93" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">review draft on request</text>
+<rect x="24" y="164" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="40" y="194" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">5. Cards</text>
+<text x="40" y="217" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">images and title cards</text>
+<rect x="264" y="164" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="280" y="194" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">6. Commit</text>
+<text x="280" y="217" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">generated files only</text>
+<rect x="504" y="164" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="520" y="194" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">7. Build</text>
+<text x="520" y="217" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">Hugo, drafts excluded</text>
+<rect x="744" y="164" width="196" height="72" rx="10" fill="#313436" stroke="#4e5152"/>
+<text x="760" y="194" font-family="Roboto, system-ui, sans-serif" font-size="17" font-weight="600" fill="#faf8f4">8. Deploy</text>
+<text x="760" y="217" font-family="Roboto, system-ui, sans-serif" font-size="13.5" fill="#c5c4be">Pages, then social drafts</text>
+</svg>

@@ -1,0 +1,92 @@
+# Site settings. The only Hugo site configuration file; no root-level config exists.
+# Markup lives in markup.toml, theme parameters in params.toml,
+# languages and menus in their own files in this directory.
+
+baseURL = "https://bengt.no/"
+theme = "blowfish"
+title = "Bengt Grønås"
+timeZone = "Europe/Oslo"
+
+defaultContentLanguage = "no"
+defaultContentLanguageInSubdir = false
+# No redirect stub at /no/: Norwegian lives at the root only.
+disableDefaultSiteRedirect = true
+
+enableRobotsTXT = true
+enableEmoji = false
+enableGitInfo = false
+summaryLength = 0
+
+# Publication gates. CI passes the same values explicitly on the command line.
+buildDrafts = false
+buildFuture = false
+buildExpired = false
+
+# Hugo must never treat automation folders as site input.
+ignoreFiles = ['\.tmp-.*', '\.candidate\.md$']
+
+[pagination]
+  pagerSize = 10
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+  series = "series"
+
+[frontmatter]
+  lastmod = ["lastmod", "date"]
+
+[sitemap]
+  changefreq = "weekly"
+  filename = "sitemap.xml"
+  priority = 0.5
+
+[services.rss]
+  limit = 30
+
+# PublicationManifest lists the production-eligible posts Hugo actually rendered.
+# scripts/build_manifest.py turns it into the deployed publication-manifest.json.
+[outputFormats.PublicationManifest]
+  mediaType = "application/json"
+  baseName = "publication-manifest"
+  isPlainText = true
+  notAlternative = true
+
+[outputs]
+  home = ["HTML", "RSS", "JSON", "PublicationManifest"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML"]
+  term = ["HTML", "RSS"]
+
+# Bundle resources are published only when a template asks for their URL.
+# Originals therefore stay out of public/ unless a render hook links them.
+[[cascade]]
+  [cascade.build]
+    publishResources = false
+  [cascade.target]
+    kind = "page"
+
+[imaging]
+  anchor = "Center"
+  resampleFilter = "Lanczos"
+  [imaging.jpeg]
+    quality = 82
+  [imaging.webp]
+    quality = 80
+    hint = "photo"
+
+[related]
+  threshold = 0
+  toLower = false
+  [[related.indices]]
+    name = "series"
+    weight = 100
+  [[related.indices]]
+    name = "tags"
+    weight = 80
+  [[related.indices]]
+    name = "categories"
+    weight = 40
+  [[related.indices]]
+    name = "date"
+    weight = 10

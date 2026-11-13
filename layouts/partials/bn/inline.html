@@ -1,0 +1,10 @@
+{{- /* Markup for the image render hook. Returns safe HTML. */ -}}
+{{- if eq .tpl "picture" -}}
+<picture>
+  <source type="image/webp" srcset="{{ .webp }}" sizes="{{ .sizes }}">
+  <img src="{{ .src }}" srcset="{{ .fb }}" sizes="{{ .sizes }}" alt="{{ .alt }}" width="{{ .width }}" height="{{ .height }}" loading="lazy" decoding="async">
+</picture>
+{{- else -}}
+<img src="{{ .src }}" alt="{{ .alt }}" loading="lazy" decoding="async"
+  {{- with .width }} width="{{ . }}"{{ end }}{{ with .height }} height="{{ . }}"{{ end }}>
+{{- end -}}

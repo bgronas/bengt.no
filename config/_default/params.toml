@@ -1,0 +1,98 @@
+# Blowfish theme parameters (pinned theme: v3.10.0). Keys follow the theme's
+# own config/_default/params.toml; see docs/design-system.md.
+
+colorScheme = "bengt"
+defaultAppearance = "dark"
+autoSwitchAppearance = false
+
+enableSearch = true
+enableCodeCopy = true
+enableA11y = false
+enableStructuredBreadcrumbs = true
+disableImageZoom = true
+disableImageOptimization = false
+disableImageOptimizationMD = false
+disableTextInHeader = false
+highlightCurrentMenuArea = true
+smartTOC = true
+replyByEmail = false
+
+mainSections = ["posts"]
+defaultSocialImage = "img/default-social.png"
+thumbnailAspectRatio = "1.905"
+fingerprintAlgorithm = "sha512"
+
+[seo]
+  metaDescriptionOrder = ["description", "summary", "site"]
+
+[header]
+  layout = "basic"
+
+[footer]
+  showMenu = true
+  showCopyright = true
+  showThemeAttribution = true
+  showAppearanceSwitcher = true
+  showScrollToTop = true
+
+[homepage]
+  layout = "custom"
+  showRecent = false
+  showRecentItems = 6
+  featuredItems = 3
+
+[article]
+  showDate = true
+  showDateUpdated = true
+  showAuthor = false
+  showHero = false
+  heroStyle = "basic"
+  showBreadcrumbs = true
+  showDraftLabel = true
+  showEdit = false
+  seriesOpened = true
+  showHeadingAnchors = true
+  showPagination = true
+  invertPagination = false
+  showReadingTime = true
+  showReadingProgress = false
+  showTableOfContents = true
+  showRelatedContent = true
+  relatedContentLimit = 3
+  showTaxonomies = true
+  showCategories = true
+  showTags = true
+  showAuthorsBadges = false
+  showWordCount = true
+  showViews = false
+  showLikes = false
+  sharingLinks = ["linkedin", "twitter", "bluesky", "email"]
+  showZenMode = true
+  externalLinkForceNewTab = false
+
+[list]
+  showHero = false
+  showBreadcrumbs = false
+  showSummary = true
+  showTableOfContents = false
+  showCards = true
+  orderByWeight = false
+  groupByYear = false
+  cardView = false
+  constrainItemsWidth = true
+
+[sitemap]
+  excludedKinds = ["taxonomy", "term"]
+
+[taxonomy]
+  showTermCount = true
+  showHero = false
+  showBreadcrumbs = false
+  cardView = false
+
+[term]
+  showHero = false
+  showBreadcrumbs = true
+  showTableOfContents = false
+  groupByYear = false
+  cardView = false

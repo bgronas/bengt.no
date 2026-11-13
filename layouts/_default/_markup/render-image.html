@@ -1,0 +1,73 @@
+{{- /* Markdown image render hook. One resource policy for every article image:
+       - JPEG: auto-oriented, resized (never upscaled, max 1920 px), lossy WebP + JPEG fallback.
+       - PNG: resized (never upscaled), lossless WebP + PNG fallback, so screenshots stay sharp.
+         A file listed in front matter `images_lossy` is encoded as a photograph instead.
+       - GIF and WebP sources: served unchanged, which keeps animation intact.
+       - SVG: served unchanged, never rasterised.
+       - Remote images: referenced as written.
+       A local reference that does not resolve fails the build. */ -}}
+{{- $dest := .Destination -}}
+{{- $u := urls.Parse $dest -}}
+{{- $alt := .PlainText -}}
+{{- $caption := .Title -}}
+{{- $isRemote := in (slice "http" "https") $u.Scheme -}}
+{{- $maxEdge := 1920 -}}
+{{- $widths := slice 480 800 1200 1600 1920 -}}
+{{- $sizes := "(min-width: 64rem) 46rem, 100vw" -}}
+{{- $html := "" -}}
+
+{{- if $isRemote -}}
+  {{- $html = partial "bn/inline.html" (dict "tpl" "plain" "src" $dest "alt" $alt) -}}
+{{- else if $u.Scheme -}}
+  {{- errorf "Unsupported image URL scheme %q in %s. Use a bundle-relative path or an https URL." $u.Scheme .Page.File.Path -}}
+{{- else -}}
+  {{- $path := strings.TrimPrefix "./" $u.Path -}}
+  {{- $res := .PageInner.Resources.Get $path -}}
+  {{- if not $res -}}
+    {{- errorf "Image %q referenced in %s was not found in the page bundle. Add the file next to index.md or fix the path." $dest .Page.File.Path -}}
+  {{- else -}}
+    {{- $sub := $res.MediaType.SubType -}}
+    {{- if eq $sub "svg" -}}
+      {{- $w := "" -}}{{- $h := "" -}}
+      {{- with findRESubmatch `<svg[^>]*?\swidth="([0-9.]+)(?:px)?"` $res.Content 1 }}{{ $w = index (index . 0) 1 }}{{ end -}}
+      {{- with findRESubmatch `<svg[^>]*?\sheight="([0-9.]+)(?:px)?"` $res.Content 1 }}{{ $h = index (index . 0) 1 }}{{ end -}}
+      {{- $html = partial "bn/inline.html" (dict "tpl" "plain" "src" $res.RelPermalink "alt" $alt "width" $w "height" $h) -}}
+    {{- else if in (slice "gif" "webp") $sub -}}
+      {{- $html = partial "bn/inline.html" (dict "tpl" "plain" "src" $res.RelPermalink "alt" $alt "width" $res.Width "height" $res.Height) -}}
+    {{- else if in (slice "jpeg" "png") $sub -}}
+      {{- $lossy := or (eq $sub "jpeg") (in (.Page.Params.images_lossy | default slice) $path) -}}
+      {{- $src := $res -}}
+      {{- if eq $sub "jpeg" }}{{ $src = $res | images.Filter images.AutoOrient }}{{ end -}}
+      {{- $longest := math.Max $src.Width $src.Height -}}
+      {{- $scale := 1.0 -}}
+      {{- if gt $longest $maxEdge }}{{ $scale = div (float $maxEdge) $longest }}{{ end -}}
+      {{- $top := int (math.Round (mul $src.Width $scale)) -}}
+      {{- $cands := slice -}}
+      {{- range $widths }}{{ if lt . $top }}{{ $cands = $cands | append . }}{{ end }}{{ end -}}
+      {{- $cands = $cands | append $top -}}
+      {{- $webpOpt := cond $lossy "webp photo q80" "webp lossless" -}}
+      {{- $fallbackFmt := cond (eq $sub "jpeg") "jpg q82" "png" -}}
+      {{- $webpSet := slice -}}{{- $fbSet := slice -}}{{- $fallback := false -}}
+      {{- range $cands -}}
+        {{- $wp := $src.Resize (printf "%dx %s" . $webpOpt) -}}
+        {{- $fb := $src.Resize (printf "%dx %s" . $fallbackFmt) -}}
+        {{- $webpSet = $webpSet | append (printf "%s %dw" $wp.RelPermalink $wp.Width) -}}
+        {{- $fbSet = $fbSet | append (printf "%s %dw" $fb.RelPermalink $fb.Width) -}}
+        {{- $fallback = $fb -}}
+      {{- end -}}
+      {{- $html = partial "bn/inline.html" (dict "tpl" "picture" "webp" (delimit $webpSet ", ") "fb" (delimit $fbSet ", ")
+            "src" $fallback.RelPermalink "width" $fallback.Width "height" $fallback.Height "alt" $alt "sizes" $sizes) -}}
+    {{- else -}}
+      {{- errorf "Image %q in %s has unsupported type %s. Supported: JPEG, PNG, WebP, GIF, SVG." $dest .Page.File.Path $res.MediaType.Type -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if .IsBlock -}}
+<figure class="bn-figure">
+  {{ $html }}
+  {{- with $caption }}<figcaption>{{ . }}</figcaption>{{ end }}
+</figure>
+{{- else -}}
+{{ $html }}
+{{- end -}}

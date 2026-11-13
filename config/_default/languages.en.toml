@@ -1,0 +1,24 @@
+# British English, published under /en/.
+disabled = false
+locale = "en-GB"
+label = "English"
+weight = 2
+title = "Bengt Grønås"
+contentDir = "content/en"
+
+[params]
+  displayName = "English"
+  isoCode = "en-GB"
+  ogLocale = "en_GB"
+  rtl = false
+  dateFormat = "2 January 2006"
+  description = "Engineering notes on platforms, automation and operations."
+  signature = "bengt.no"
+
+[params.author]
+  name = "Bengt Grønås"
+  headline = "Engineering notes on platforms, automation and operations."
+  links = [
+    { github = "https://github.com/bgronas" },
+    { linkedin = "https://linkedin.com/in/bgronas" },
+  ]

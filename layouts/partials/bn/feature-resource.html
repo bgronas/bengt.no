@@ -1,0 +1,14 @@
+{{- /* Returns the page's feature image resource or nil.
+       Explicit `featureimage` front matter wins; otherwise the theme's own
+       matching order for bundle images applies. */ -}}
+{{- $img := false -}}
+{{- with .Params.featureimage -}}
+  {{- $img = $.Resources.Get . -}}
+{{- end -}}
+{{- if not $img -}}
+  {{- $images := .Resources.ByType "image" -}}
+  {{- range slice "*feature*" "*cover*" "*thumbnail*" -}}
+    {{- if not $img -}}{{- $img = $images.GetMatch . -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $img -}}

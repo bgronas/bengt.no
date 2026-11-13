@@ -1,0 +1,12 @@
+{{- /* Math: $$...$$ and \[...\] blocks, \(...\) inline, rendered at build time
+       by Hugo's embedded KaTeX. No JavaScript is shipped for math. The page
+       store flag makes extend-head-uncached.html load the KaTeX stylesheet. */ -}}
+{{- $opts := dict "output" "htmlAndMathml" "displayMode" (eq .Type "block") -}}
+{{- with try (transform.ToMath .Inner $opts) -}}
+  {{- with .Err -}}
+    {{- errorf "Math in %s could not be rendered: %s (%s)" $.Page.File.Path . $.Position -}}
+  {{- else -}}
+    {{- $.Page.Store.Set "hasMath" true -}}
+    {{- .Value -}}
+  {{- end -}}
+{{- end -}}

@@ -17,3 +17,19 @@ bn:
   search_site: "Søk på nettstedet"
   pending_metadata: "[venter på berikelse]"
   machine_translation_draft: "Maskinoversettelse som venter på gjennomgang"
+
+# Keys the pinned theme's i18n/nb.yaml does not define (compared with its en.yaml).
+# Without them the controls below have no accessible name on Norwegian pages.
+nav:
+  main_menu: "Hovedmeny"
+  mobile_menu: "Mobilmeny"
+  footer_menu: "Bunnmeny"
+  close_menu: "Lukk meny"
+  toggle_submenu: "Vis eller skjul undermeny"
+error:
+  404_home: "Til forsiden"
+article:
+  reply_to: "Svar på {{ .Title }}"
+# The visible shortcut hint (Ctrl K or ⌘K) must be part of the accessible name (WCAG 2.5.3).
+search:
+  open_button_title: "Søk, Ctrl K eller ⌘K eller /"

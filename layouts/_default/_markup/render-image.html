@@ -64,7 +64,10 @@
 {{- end -}}
 
 {{- if .IsBlock -}}
-<figure class="bn-figure">
+{{- /* SVG diagrams keep a legible width on narrow screens and scroll inside
+       the figure, so the figure is a focusable, named region. */ -}}
+{{- $scroll := and (not $isRemote) (strings.HasSuffix (lower $u.Path) ".svg") -}}
+<figure class="bn-figure{{ if $scroll }} bn-figure--scroll{{ end }}"{{ if $scroll }} tabindex="0" role="group" aria-label="{{ $alt }}"{{ end }}>
   {{ $html }}
   {{- with $caption }}<figcaption>{{ . }}</figcaption>{{ end }}
 </figure>

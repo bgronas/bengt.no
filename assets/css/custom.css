@@ -328,6 +328,9 @@ body {
 }
 
 .bn-table table {
+  /* The wrapper is the scroll region; the theme's own table scrolling is undone. */
+  display: table;
+  overflow: visible;
   width: 100%;
   margin: 0;
   font-size: 0.95rem;
@@ -382,6 +385,7 @@ body {
 .bn-diagram pre.mermaid {
   margin: 0;
   padding: 0;
+  overflow: visible; /* the figure is the one scroll region */
   background: transparent;
   text-align: center;
   white-space: pre;
@@ -417,5 +421,65 @@ body {
   .bn-links,
   .bn-topics {
     display: none;
+  }
+}
+
+/* ---------- Article rows ---------- */
+
+/* Show the whole 1200x630 title card in list rows instead of a centre crop. */
+.article-link--simple .thumbnail {
+  aspect-ratio: 1200 / 630;
+  min-height: 0;
+  align-self: flex-start;
+}
+
+@media (min-width: 48rem) {
+  .article-link--simple .thumbnail {
+    width: 17rem;
+    margin: 1rem 0 1rem 1rem;
+    border-radius: calc(var(--bn-radius) * 0.75);
+  }
+}
+
+/* ---------- Diagrams on narrow screens ---------- */
+
+/* A diagram scaled to 320 px is unreadable. Keep it legible and let its own
+   box scroll sideways; the page itself never scrolls horizontally. */
+.bn-figure--scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 40rem) {
+  .bn-figure img[src$=".svg"],
+  .bn-diagram pre.mermaid svg {
+    min-width: 34rem;
+  }
+}
+
+/* Tables with three or more columns keep a readable width and scroll in their region. */
+.bn-table table:has(th:nth-child(3)) {
+  min-width: 34rem;
+}
+
+/* ---------- Copy buttons ---------- */
+
+/* The theme hides the copy button until the pointer hovers, which removes it
+   from the tab order and from touch screens. Keep it in the page, transparent
+   until hover or focus, and always shown where there is no hover. */
+.highlight-wrapper > .copy-button {
+  visibility: visible;
+  opacity: 0;
+}
+
+.highlight-wrapper:hover > .copy-button,
+.highlight-wrapper:focus-within > .copy-button,
+.highlight-wrapper > .copy-button:focus-visible {
+  opacity: 0.92;
+}
+
+@media (hover: none) {
+  .highlight-wrapper > .copy-button {
+    opacity: 0.92;
   }
 }

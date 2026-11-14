@@ -17,3 +17,7 @@ bn:
   search_site: "Search the site"
   pending_metadata: "[pending enrichment]"
   machine_translation_draft: "Machine translation awaiting review"
+
+# The visible shortcut hint (Ctrl K or ⌘K) must be part of the accessible name (WCAG 2.5.3).
+search:
+  open_button_title: "Search, Ctrl K or ⌘K or /"

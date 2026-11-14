@@ -12,6 +12,9 @@ if [[ -n "${UV_NATIVE_TLS:-}" && -z "${UV_SYSTEM_CERTS:-}" ]]; then
   unset UV_NATIVE_TLS
 fi
 
+# Python reads and prints UTF-8 on every platform, including Windows consoles.
+export PYTHONUTF8=1
+
 EXPECTED_REPO="${BN_EXPECTED_REPO:-bgronas/bengt.no}"
 EXPECTED_BRANCH="main"
 
@@ -57,9 +60,28 @@ py() {
   uv run --frozen --quiet python "$@"
 }
 
+# Path of the Hugo binary installed from uv.lock. The `hugo` launcher in .venv is a
+# Python wrapper; on Windows it answers Ctrl+C with a traceback, so the binary is
+# started directly. Empty when it cannot be located; hugo_cmd then uses the launcher.
+hugo_binary() {
+  local dir
+  dir="$(uv run --frozen --quiet python -c 'import hugo.cli, pathlib; print((pathlib.Path(hugo.cli.__file__).parent / "binaries").as_posix())' 2>/dev/null)" || return 0
+  if [[ -f "$dir/hugo.exe" ]]; then
+    printf '%s\n' "$dir/hugo.exe"
+  elif [[ -f "$dir/hugo" ]]; then
+    printf '%s\n' "$dir/hugo"
+  fi
+}
+
 hugo_cmd() {
   need uv "Install uv, then run ./publish.sh setup"
-  uv run --frozen --quiet hugo "$@"
+  local bin
+  bin="$(hugo_binary)"
+  if [[ -n "$bin" ]]; then
+    "$bin" "$@"
+  else
+    uv run --frozen --quiet hugo "$@"
+  fi
 }
 
 require_theme() {
@@ -96,8 +118,13 @@ cmd_new() {
 cmd_preview() {
   require_theme
   say "Preview with drafts at http://localhost:1313/ (Ctrl+C to stop). Nothing is published."
+  say "The address is live once Hugo prints \"Web Server is available\"."
+  # Ctrl+C stops Hugo; this script then ends normally instead of being killed with it.
+  trap ':' INT
   hugo_cmd server --buildDrafts --buildFuture --bind 127.0.0.1 --port 1313 \
-    --baseURL "http://localhost:1313/" --disableFastRender --navigateToChanged "$@"
+    --baseURL "http://localhost:1313/" --disableFastRender --navigateToChanged "$@" || true
+  trap - INT
+  say "Preview stopped."
 }
 
 cmd_check() {

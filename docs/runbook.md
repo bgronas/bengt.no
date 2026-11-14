@@ -16,6 +16,8 @@ git remote set-url origin https://github.com/bgronas/bengt.no.git
 
 On Windows use Git Bash for these commands, or `publish setup` and `publish preview` from cmd.exe or PowerShell. `setup` installs nothing system-wide.
 
+Keep the working copy outside Dropbox, OneDrive and similar synced folders: it holds more than 12,000 small files (`.venv/`, the theme, `.git/`). Reasons and a workaround: [operations.md](operations.md#working-copy-on-windows-and-in-synced-folders).
+
 ## 2. Activate (once)
 
 Full detail, DNS table and troubleshooting: [dns-and-pages.md](dns-and-pages.md). Order:

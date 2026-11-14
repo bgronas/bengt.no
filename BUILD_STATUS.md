@@ -45,6 +45,10 @@ Engineering notes for resuming the build. No credentials, no draft text.
   delivery as an archive, earlier answers unchanged. Wrote `docs/cms.md`, `operations.md`,
   `dns-and-pages.md`, `design-system.md`, `acceptance-report.md`. Full verification pass: commands and
   results in `docs/acceptance-report.md`.
+- 2026-11-14 afternoon: First run on the author's Windows machine (Git Bash). `doctor` failed on the three
+  theme override checks because of CRLF checkout; fixed with LF-normalised text hashes, also in the import
+  manifest. `preview` now starts the Hugo binary directly. Open: the first preview build on Windows did not
+  finish before it was interrupted; cause unknown. Details: `docs/acceptance-report.md`, section 9.
 
 ## Open after this build (external, not code)
 

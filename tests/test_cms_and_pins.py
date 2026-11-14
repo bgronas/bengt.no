@@ -7,7 +7,7 @@ from pathlib import Path
 import policy_schema
 import sync_cms_schema
 import yaml
-from lib.common import load_policy, sha256_file
+from lib.common import load_policy, sha256_file, sha256_text, sha256_text_file
 
 from tests.conftest import REPO
 
@@ -114,9 +114,19 @@ def test_theme_overrides_still_match_their_upstream_files() -> None:
         assert (REPO / item["local"]).is_file()
         upstream = REPO / item["upstream"]
         if upstream.exists():
-            assert sha256_file(upstream) == item["upstream_sha256"], (
+            assert sha256_text_file(upstream) == item["upstream_sha256"], (
                 f"{item['upstream']} changed: re-apply the edits in {item['local']}"
             )
+
+
+def test_theme_override_check_is_independent_of_line_endings() -> None:
+    """Git for Windows checks the theme out with CRLF; the recorded hashes are of the LF blobs."""
+    data = json.loads((REPO / "data/theme-overrides.json").read_text(encoding="utf-8"))
+    for item in data["overrides"]:
+        upstream = REPO / item["upstream"]
+        if upstream.exists():
+            as_windows = upstream.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+            assert sha256_text(as_windows) == item["upstream_sha256"]
 
 
 def test_pins_are_consistent() -> None:

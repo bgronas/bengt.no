@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from lib import content
-from lib.common import PolicyError, load_policy, run_cli, sha256_file
+from lib.common import PolicyError, load_policy, run_cli, sha256_file, sha256_text_file
 
 
 class Doctor:
@@ -110,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         for item in overrides["overrides"]:
             upstream = root / item["upstream"]
-            if upstream.is_file() and sha256_file(upstream) == item["upstream_sha256"]:
+            if upstream.is_file() and sha256_text_file(upstream) == item["upstream_sha256"]:
                 d.ok(f"theme override {item['local']} matches the upstream file it was derived from")
             else:
                 d.fail(

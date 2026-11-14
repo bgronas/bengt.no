@@ -92,6 +92,14 @@ VERIFIED with Lighthouse 13.6.0 (mobile, simulated slow 4G): 2.6 s on the homepa
 - GitHub Pages apex A and AAAA addresses and the `www` CNAME rule: read again from GitHub Docs; values in `docs/dns-and-pages.md`.
 - `bgronas/bengt.no`: `main` at `979d479`, one file (`README.md`).
 
+## Line endings and hashes (2026-11-14, after the first run on Windows)
+
+VERIFIED from the author's Git Bash run and reproduced on Linux with `core.autocrlf=true`: `doctor` reported all three theme overrides as "changed upstream", because Git for Windows had checked the theme out with CRLF and the recorded hashes are of the LF blobs. Text hashes that are compared across machines now normalise CRLF to LF (`lib.common.sha256_text`, `content_hash`). The same defect existed, unobserved, in the import manifest: a CRLF inbox file hashed on Windows would have been reported as a conflict by the Linux runner. Fixed with the same function and covered by a test. Binary files and the bytes written to articles are unaffected.
+
+## Hugo launcher
+
+`publish.sh` starts the Hugo binary inside the `hugo` wheel directly. VERIFIED in the wheel's `cli.py`: on Windows the Python launcher runs Hugo as a child process, so Ctrl+C in `preview` ended in a Python traceback. The launcher remains the fallback when the binary cannot be located, and the workflows still use `uv run hugo`.
+
 ## Not done, by design
 
 - No posting to LinkedIn or X, no OAuth for either.

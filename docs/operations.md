@@ -220,6 +220,20 @@ on:
 
 GitHub evaluates cron in UTC only and does not follow daylight saving time. Scheduled runs use the same workflow, the same permissions and the same idempotent steps; a run with nothing new commits nothing and redeploys the current content. GitHub disables scheduled workflows in public repositories after 60 days without repository activity.
 
+## Working copy on Windows and in synced folders
+
+Line endings: this repository forces LF for its own text files (`.gitattributes`). The theme submodule does not, so Git for Windows checks it out with CRLF. Every hash that compares text across machines (theme override check, inbox import manifest, article content hash) is calculated on LF-normalised bytes, so a Windows working copy and the Linux runner agree. An inbox file saved with CRLF is imported with its body as it is; Git stores it with LF.
+
+Synced folders (Dropbox, OneDrive, iCloud): a working copy holds about 10,000 files in `.venv/`, 2,500 in `themes/blowfish/` and Git's own database in `.git/`. A sync client uploads all of them, can lock files while Hugo or Git reads them, and can damage `.git/` when two machines sync at once. Git is the synchronisation mechanism here. Keep the working copy outside the synced folder and clone it on each machine.
+
+If it has to stay in a synced folder, move at least the virtual environment out. uv reads the location from an environment variable:
+
+```bash
+export UV_PROJECT_ENVIRONMENT="$HOME/.venvs/bengt.no"     # in ~/.bashrc, then ./publish.sh setup
+```
+
+`preview` starts the Hugo binary directly. Ctrl+C stops it and prints "Preview stopped."; the address works from the moment Hugo prints "Web Server is available".
+
 ## Routine checks
 
 ```bash

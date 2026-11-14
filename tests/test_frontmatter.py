@@ -78,3 +78,11 @@ def test_slug_transliteration_is_deterministic() -> None:
     assert slugify("Grønås") == "gronas"
     assert slugify("  Hello,   World! ") == "hello-world"
     assert slugify("Crème brûlée") == "creme-brulee"
+
+
+def test_content_hash_is_the_same_for_crlf_and_lf_copies() -> None:
+    from lib.common import content_hash
+
+    meta = {"title": "T", "summary": "S", "description": "D"}
+    assert content_hash(meta, b"One\r\n\r\nTwo\r\n") == content_hash(meta, b"One\n\nTwo\n")
+    assert content_hash(meta, b"One\n\nTwo\n") != content_hash(meta, b"One\n\nTwo edited\n")

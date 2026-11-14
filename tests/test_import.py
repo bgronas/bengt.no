@@ -53,6 +53,22 @@ def test_rough_draft_imports_once_then_is_a_noop_then_conflicts(repo: Path, caps
     assert import_drafts.main([]) == 0
 
 
+def test_windows_line_endings_do_not_turn_into_a_conflict_on_the_runner(repo: Path, capsys) -> None:
+    """An inbox file saved with CRLF on Windows is stored with LF by Git (.gitattributes).
+    The runner therefore sees other bytes; that must not look like an edited source."""
+    source = repo / "inbox/en/from-windows.md"
+    source.write_bytes(b"# From Windows\r\n\r\nFirst paragraph.\r\n")
+    assert import_drafts.main([]) == 0
+    bundle = repo / "content/en/posts/2026-11-13-from-windows/index.md"
+    assert fm.load(bundle).body == b"# From Windows\r\n\r\nFirst paragraph.\r\n", "the body is still copied as it is"
+
+    source.write_bytes(b"# From Windows\n\nFirst paragraph.\n")
+    capsys.readouterr()
+    assert import_drafts.main([]) == 0
+    out = capsys.readouterr().out
+    assert "unchanged" in out and "conflict" not in out
+
+
 def test_supplied_metadata_is_respected_but_draft_is_forced(repo: Path) -> None:
     _inbox(
         repo, "no", "min.md",

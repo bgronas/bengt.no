@@ -10,7 +10,7 @@ Result classes: **PASS** (run here, passed), **PASS (simulated)** (run here agai
 
 | # | Command | Result |
 |---|---|---|
-| 1 | `./publish.sh test` (Ruff check, Ruff format check, mypy on 25 files, check-jsonschema for both workflows and Dependabot, pytest) | PASS: 168 passed, 2 skipped. The two skipped tests are the opt-in live API test and the opt-in browser test. |
+| 1 | `./publish.sh test` (Ruff check, Ruff format check, mypy on 25 files, check-jsonschema for both workflows and Dependabot, pytest) | PASS: 171 passed, 2 skipped (after the Windows fixes of section 9; 168 before). The two skipped tests are the opt-in live API test and the opt-in browser test. |
 | 2 | `./publish.sh doctor` | PASS: 0 failures, 2 warnings (`code` not installed; no `origin` remote in the build folder) |
 | 3 | `./publish.sh check` | PASS |
 | 4 | `python tests/browser/smoke.py <site> 8768 --axe axe.min.js --article /en/posts/how-this-site-is-published/` | PASS: 201 checks, 0 failures; 40 axe runs, 0 violations |
@@ -106,7 +106,7 @@ Tests are named `file::test`. "Fresh clone" refers to commands 7 to 10 above.
 | Distinct concepts not conflated; `ha` not converted | `test_taxonomy::test_ambiguous_ha_is_never_converted`, `…distinct_concepts_are_not_conflated` | PASS |
 | Social drafts outside all published bundle resources | Drafts are written to `social-drafts/` at the repository root, which Hugo does not read; `test_site_build::test_no_repository_internals_in_the_output` | PASS |
 | Mobile/desktop, light/dark, keyboard, accessibility, search, metadata reviewed | Browser smoke, axe, screenshots, Lighthouse, section 3 | PASS with the limits below |
-| Fresh clone follows the README without hidden state | Commands 7 to 11 | PASS on Linux. Windows (Git Bash, `publish.cmd`) and macOS: UNTESTED |
+| Fresh clone follows the README without hidden state | Commands 7 to 11 | PASS on Linux. Windows with Git Bash: section 9. `publish.cmd` and macOS: UNTESTED |
 
 ### Lighthouse (mobile preset, simulated slow 4G, preview build with the example articles)
 
@@ -141,7 +141,7 @@ Targets: accessibility, SEO, best practices ≥ 95: met. Mobile performance ≥ 
 | Live-page verification after deployment (`x-content-commit` on `https://bengt.no/…`) | No deployed site. Logic tested with a stub HTTP client (`test_social::test_verification_is_bounded`, `…unconfirmed_deployment…`) |
 | Pages CMS hosted application: listing, intake creation, media upload, merge-mode saves, action buttons | Needs the GitHub App on the real repository |
 | DNS, domain verification, certificate, Enforce HTTPS | Not changed, not observed |
-| `publish.cmd`, Git Bash, WSL, macOS | Linux only |
+| `publish.cmd`, WSL, macOS | Not run. Git Bash on Windows: see section 9 |
 | Opening VS Code from `new` | `code` not installed; the fallback message was seen |
 | `check --external-links` against real sites | Network egress from this container is restricted. Classification, GET fallback and per-host delay are tested with a stub client (`test_validate::test_external_link_check_separates_missing_from_inconclusive_and_is_rate_limited`) |
 | Dependabot behaviour (uv ecosystem, ignore rule) | Configuration passes the Dependabot schema; no pull request was observed |
@@ -161,7 +161,21 @@ Targets: accessibility, SEO, best practices ≥ 95: met. Mobile performance ≥ 
 
 Additional entry points beyond the brief: `publish.cmd`, `./publish.sh draft`, `cards`, `cms-sync`, `test`; scripts `detect_features.py`, `post_tool.py`, `sync_cms_schema.py`, `policy_schema.py`.
 
-## 9. Repository tree
+## 9. First run on Windows (author's machine, 2026-11-14)
+
+Source: the author's terminal output from Git Bash (MINGW64), Git 2.55.0.windows.3, uv 0.12.18, Python 3.12.14, working copy in a Dropbox folder. Not run by the build session.
+
+| Step | Observed | Status |
+|---|---|---|
+| `git clone <bundle>`, `./publish.sh setup` | 53 packages installed, theme checked out at `3e4b25c4dc74`, Hugo 0.169.0 extended found, VS Code found, 17 doctor checks ok | Worked |
+| `doctor`, theme override checks | 3 failures: "changed upstream" for all three overridden theme files | Defect. Cause: CRLF checkout of the theme. Reproduced on Linux with `core.autocrlf=true`, fixed (hashes on LF-normalised bytes), verified in that reproduction: 0 failures |
+| `./publish.sh preview` | Hugo started and printed "Start building sites"; the output ends with Ctrl+C and a Python traceback before any build result | The traceback is the Hugo wheel's launcher reacting to Ctrl+C on Windows, not a build error; `preview` now starts the binary directly. **Whether the first build was slow or stalled is not known**: the output does not say how long it ran. The same build takes under 1 s on Linux with empty caches, also with a CRLF theme. Not reproduced, not explained |
+
+Found by reasoning from the first defect, not observed: the import manifest had the same line-ending dependency and would have reported a conflict on the runner for an inbox file saved with CRLF. Fixed and tested (`test_import::test_windows_line_endings_do_not_turn_into_a_conflict_on_the_runner`).
+
+The fixes were verified on Linux only. They have not been run on Windows.
+
+## 10. Repository tree
 
 Theme submodule contents omitted.
 

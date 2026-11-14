@@ -253,10 +253,26 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def lf(data: bytes) -> bytes:
+    """CRLF to LF. Git stores text with LF (.gitattributes) while a Windows working copy
+    may hold CRLF, so a hash of text must not depend on the line endings on disk."""
+    return data.replace(b"\r\n", b"\n")
+
+
+def sha256_text(data: bytes) -> str:
+    """SHA-256 of text, identical for a CRLF and an LF copy of the same file."""
+    return sha256_bytes(lf(data))
+
+
+def sha256_text_file(path: Path) -> str:
+    return sha256_text(path.read_bytes())
+
+
 def content_hash(meta: dict[str, Any], body: bytes) -> str:
-    """Hash of what a reader sees: title, summary, description and the exact body bytes."""
+    """Hash of what a reader sees: title, summary, description and the body.
+    Line endings are normalised, so Windows and the Linux runner agree."""
     head = {k: str(meta.get(k) or "") for k in ("title", "summary", "description")}
-    blob = json.dumps(head, ensure_ascii=False, sort_keys=True).encode("utf-8") + b"\0" + body
+    blob = json.dumps(head, ensure_ascii=False, sort_keys=True).encode("utf-8") + b"\0" + lf(body)
     return "sha256:" + sha256_bytes(blob)
 
 

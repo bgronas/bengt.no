@@ -35,8 +35,9 @@ from lib.common import (
     now_local,
     rfc3339,
     run_cli,
-    sha256_bytes,
     sha256_file,
+    sha256_text,
+    sha256_text_file,
     slugify,
     title_from_slug,
 )
@@ -234,7 +235,7 @@ def import_one(policy: LoadedPolicy, lang: str, source: Path, dry_run: bool) -> 
 
     result = {
         "bundle": f"{target.relative_to(policy.root).as_posix()}/index.md",
-        "source_sha256": sha256_bytes(raw),
+        "source_sha256": sha256_text(raw),
         "assets": [
             {"source": src.relative_to(policy.root).as_posix(), "target": rel, "sha256": sha256_file(src)}
             for rel, src in sorted(assets, key=lambda a: a[0])
@@ -289,7 +290,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for lang, source in inbox_files(policy, report):
         rel = source.relative_to(policy.root).as_posix()
-        digest = sha256_file(source)
+        digest = sha256_text_file(source)
         known = entries.get(rel)
         if known:
             if known["source_sha256"] == digest:

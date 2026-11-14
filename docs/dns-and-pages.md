@@ -2,31 +2,31 @@
 
 Nothing in this document was executed by the build session. No push, no repository setting, no DNS record and no HTTPS state was changed or observed. Every "expected" value below is what the official documentation specifies, not a measured result.
 
-Target: repository `bgronas/bengt.no`, a project Pages site of the account `bgronas`, served on the custom domain `bengt.no`. The repository `bgronas/bgronas.github.io` keeps the previous site and is not touched by any step here.
+Target: repository `bgronas/bengt.no`, a project Pages site of the account `bgronas`, served on the custom domain `bengt.no`. No step here touches `bgronas/bgronas.github.io` (the earlier blog) or `bgronas/test666` (the Hugo site that `bengt.no` serves from Misshosting today), on GitHub or on disk.
+
+Author decision, 2026-11-14: `bgronas/bengt.no` is a placeholder and may be overwritten. The first push replaces its history.
 
 Sources, read 2026-11-14: GitHub Docs "Managing a custom domain for your GitHub Pages site", "Verifying your custom domain for GitHub Pages", "Securing your GitHub Pages site with HTTPS", "Configuring a publishing source for your GitHub Pages site", "Managing GitHub Actions settings for a repository"; GitHub CLI manual `gh secret set`, `gh variable set`. Links are at the end.
 
 ## Order matters
 
-1. Push the code to a review branch (step 1).
+1. Connect the working copy; nothing is pushed yet (step 1).
 2. Configure the repository (steps 2 to 4).
-3. Verify the domain and set it on the repository **before** touching DNS (steps 5 and 6). GitHub's documentation gives the reason: with DNS pointing at GitHub and no site claiming the domain, someone else could claim it.
-4. Change DNS (step 7).
-5. Make the review branch `main`, which starts the first deployment (step 8).
+3. Push. This overwrites the placeholder repository and starts the first deployment (step 5).
+4. Verify the domain and set it on the repository **before** touching DNS (steps 6 and 7). GitHub's documentation gives the reason: with DNS pointing at GitHub and no site claiming the domain, someone else could claim it.
+5. Change DNS (step 8). **This is the cutover:** until then `bengt.no` keeps showing the current site at Misshosting, whatever happens on GitHub.
 6. Enforce HTTPS when the certificate exists (step 9).
 
-## 1. Push without overwriting anything
-
-`bgronas/bengt.no` exists and its `main` holds one commit with a `README.md` (observed with `git ls-remote` on 2026-11-14: `979d479`). The steps below add to it and never force-push.
+## 1. Connect the working copy
 
 ```bash
 # in the project folder cloned from the delivered bundle (docs/runbook.md)
 git remote set-url origin https://github.com/bgronas/bengt.no.git   # `git remote add origin …` if there is no origin yet
-git fetch origin
-git push origin main:blowfish-site          # review branch; starts no workflow
+git ls-remote origin                                                # proves access; changes nothing
+./publish.sh doctor                                                 # expect 0 failures
 ```
 
-Pushing to `blowfish-site` starts nothing: `deploy.yml` reacts to `main` only, `check.yml` to pull requests. Review the branch on GitHub.
+`bgronas/bengt.no` held one commit with a `README.md` when this was written (`979d479`, observed with `git ls-remote` on 2026-11-14).
 
 ## 2. Pages source
 
@@ -68,7 +68,23 @@ gh variable set ANTHROPIC_MODEL --repo bgronas/bengt.no --body "claude-sonnet-5-
 
 API usage is billed to the API key's account. It is separate from a Claude chat subscription.
 
-## 5. Verify the domain for the account
+## 5. First push
+
+```bash
+git push --force origin main
+```
+
+This is the only force push in the whole system, done once, by hand, on purpose: it replaces the placeholder history of `bgronas/bengt.no` (one `README.md`) with this project. After it, `./publish.sh ship` and the workflow only ever push without force. Equivalent alternative: delete the repository on GitHub, create it again empty, then `git push -u origin main`; a recreated repository needs steps 2 to 4 again.
+
+The push starts the Publish workflow. The two example articles are drafts, so the first deployment publishes the homepage, About and empty article lists.
+
+```bash
+gh run list --workflow deploy.yml --limit 3
+```
+
+Where the result is visible before the cutover: nowhere in finished form. The site is built for the root of `https://bengt.no/`, so at the project address `https://bgronas.github.io/bengt.no/` its stylesheet and links point outside the project path and the page appears unstyled (INFERENCE from the root-relative URLs in the build; not observed). Judge the site with `./publish.sh preview` locally, and the deployment by the green run and its "Deploy to GitHub Pages" job.
+
+## 6. Verify the domain for the account
 
 Verification is done on the account, not on the repository. It stops other GitHub accounts from using `bengt.no`.
 
@@ -84,7 +100,7 @@ dig _github-pages-challenge-bgronas.bengt.no +nostats +nocomments +nocmd TXT
 Resolve-DnsName -Name _github-pages-challenge-bgronas.bengt.no -Type TXT
 ```
 
-## 6. Custom domain on the repository
+## 7. Custom domain on the repository
 
 Repository → **Settings** → **Pages** → **Custom domain**: `bengt.no` → **Save**.
 
@@ -92,7 +108,9 @@ Repository → **Settings** → **Pages** → **Custom domain**: `bengt.no` → 
 
 `bgronas.github.io` is the Pages host that DNS points to. It is not a second address for these articles: every page declares `https://bengt.no/...` as canonical. ASSUMPTION, not checked in the build session: once the custom domain is saved, GitHub redirects the project path `bgronas.github.io/bengt.no/` to `bengt.no`.
 
-## 7. DNS records
+## 8. DNS records
+
+This step moves `bengt.no` from Misshosting to GitHub Pages. Do it when the Publish run of step 5 is green and step 7 is saved. To go back, restore the old A/AAAA/CNAME values; write them down first (`dig bengt.no +noall +answer` and `dig www.bengt.no +noall +answer`).
 
 Create these at the DNS provider for `bengt.no`:
 
@@ -107,13 +125,13 @@ Create these at the DNS provider for `bengt.no`:
 | AAAA (optional) | `@` | `2606:50c0:8002::153` |
 | AAAA (optional) | `@` | `2606:50c0:8003::153` |
 | CNAME | `www` | `bgronas.github.io` |
-| TXT | `_github-pages-challenge-bgronas` | the value from step 5 |
+| TXT | `_github-pages-challenge-bgronas` | the value from step 6 |
 
 The `www` value is the host name only: no `https://`, no path, no repository name. Some providers want a trailing dot (`bgronas.github.io.`). With the apex as the custom domain, GitHub redirects `www.bengt.no` to `bengt.no`.
 
 Remove, because they conflict:
 
-- Every other A, AAAA, ALIAS or ANAME record on `@` (the current host or parking page).
+- Every other A, AAAA, ALIAS or ANAME record on `@` (today: the Misshosting web server).
 - Any other CNAME or A record on `www`.
 - A wildcard record (`*`), if one exists. GitHub warns against wildcards.
 - URL forwarding or "web redirect" services on `@` or `www`.
@@ -136,25 +154,6 @@ Resolve-DnsName -Name www.bengt.no -Type CNAME
 
 Expected: exactly the four A addresses, exactly the four AAAA addresses if you created them, and `www.bengt.no` as a CNAME to `bgronas.github.io`. Any additional address means an old record is still present.
 
-## 8. Go live
-
-The review branch becomes `main` through a merge that keeps the existing commit as history. No force push.
-
-```bash
-git merge --allow-unrelated-histories -s ours origin/main -m "Adopt the Blowfish site; keep the earlier commit as history"
-git push origin main
-git push origin --delete blowfish-site      # optional
-```
-
-`-s ours` keeps this project's files exactly and records the old commit as a parent; the old `README.md` remains reachable in history. The push to `main` starts the Publish workflow. The two example articles are drafts, so the first deployment publishes the homepage, About and empty article lists.
-
-Then:
-
-```bash
-./publish.sh doctor
-gh run list --workflow deploy.yml --limit 3
-```
-
 ## 9. HTTPS
 
 When the DNS check passes, GitHub requests a certificate. Repository → **Settings** → **Pages** → tick **Enforce HTTPS** once it becomes available; the documentation says that can take up to 24 hours.
@@ -170,8 +169,9 @@ When the DNS check passes, GitHub requests a certificate. Repository → **Setti
 | Site shows the README or a 404 | Pages source is not "GitHub Actions", or no Publish run has succeeded yet. |
 | Deploy job fails with an environment protection message | The `github-pages` environment does not allow `main`. See step 2. |
 | "Commit generated changes" fails with 403 | Workflow permissions or branch protection. See step 3. |
-| The site works on `bgronas.github.io/bengt.no/` but not on `bengt.no` | Custom domain not saved (step 6) or DNS not changed (step 7). |
-| The domain is "already taken" | Another repository of yours, or another account, has `bengt.no` as custom domain. Remove it there; step 5 prevents other accounts from claiming it. |
+| `bengt.no` still shows the old site | DNS not changed yet, or the old records are still cached. Compare `dig` with the table in step 8 |
+| The site answers on `bgronas.github.io/bengt.no/` but not on `bengt.no` | Custom domain not saved (step 7) or DNS not changed (step 8). |
+| The domain is "already taken" | Another repository of yours, or another account, has `bengt.no` as custom domain. Remove it there; step 6 prevents other accounts from claiming it. |
 
 GitHub Pages sets its own response headers. There is no `_headers` file or similar mechanism, and nothing in this repository configures security headers.
 

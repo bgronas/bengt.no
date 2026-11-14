@@ -17,7 +17,7 @@ Result classes: **PASS** (run here, passed), **PASS (simulated)** (run here agai
 | 5 | `python tests/browser/shots.py …` for 8 pages × 3 widths × 2 appearances, screenshots reviewed | PASS: horizontal overflow 0 px on all 48 |
 | 6 | Lighthouse 13.6.0 mobile on 8 pages | See section 5. One target missed by 0.1 s (LCP on list pages) |
 | 7 | Fresh clone: `git clone --recurse-submodules`, `./publish.sh setup` | PASS: 52 packages from `uv.lock`, theme at v3.10.0, doctor 0 failures |
-| 8 | Fresh clone: push procedure of `docs/dns-and-pages.md` steps 1 and 8 against a local bare repository holding one README commit | PASS (simulated): review branch pushed, `main` fast-forwarded through the `-s ours` merge, no force push, working tree unchanged |
+| 8 | Push procedure of `docs/dns-and-pages.md` (steps 1 and 5) against a local bare repository holding one README commit: `git push --force origin main`, then `new` and `ship` | PASS (simulated): the placeholder commit is replaced, remote `main` equals the local commit, the following `ship` pushes without force. The earlier route (review branch and `-s ours` merge) was also run and passed before the author chose to overwrite |
 | 9 | Fresh clone: `new` (en and no), `ready`, `ship`, `ship` again, inbox file + `ship`, `import` again, `enrich --dry-run`, `enrich` without a key, `check`, `preview` | PASS (simulated remote). Details in section 3 |
 | 10 | Fresh clone: production build exactly as `deploy.yml` runs it, `build_manifest.py`, `validate_content.py --site public --prune-originals` | PASS |
 | 11 | Fresh clone: update commands of `docs/operations.md` with the current versions | PASS as a no-op (0 files changed). No newer compatible theme or Hugo version existed to update to |

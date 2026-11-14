@@ -8,10 +8,19 @@ Engineering notes. Each entry states the decision, the evidence class and the re
 |---|---|
 | Repository | `bgronas/bengt.no`. It held only a `README.md`. `bgronas/bgronas.github.io` keeps the previous site and is not touched. |
 | Biography | Minimal: name, a neutral topic line, GitHub and LinkedIn links. No employer, role or history. |
-| DNS today | `bengt.no` points to another host or is parked. The runbook replaces A/AAAA/CNAME and leaves MX/TXT alone. |
+| DNS today | `bengt.no` points to another host (Misshosting, see the 2026-11-14 decisions). The runbook replaces A/AAAA/CNAME and leaves MX/TXT alone. |
 | Windows | Git Bash, plus `publish.cmd` as a forwarder. |
 
 Consequence of the repository choice (INFERENCE): the site is a *project* Pages site of the account `bgronas`, served on the custom domain `bengt.no`. The `www` CNAME still targets `bgronas.github.io`, the account's Pages host. Section 12 of the brief names `bgronas/bgronas.github.io`; every instruction was adapted to `bgronas/bengt.no`.
+
+## Author decisions (2026-11-14)
+
+| Topic | Decision |
+|---|---|
+| `bgronas/bengt.no` | Placeholder. May be overwritten or deleted; the first push is a one-time `git push --force origin main`. The earlier non-destructive route (review branch, `-s ours` merge) is no longer documented. |
+| `bgronas/bgronas.github.io` | Untouched, on GitHub and on disk. |
+| `bengt.no` today | Served from Misshosting; its Hugo source is the `test666` folder and repository. Untouched. The DNS change is the cutover and the only step visitors notice. |
+| Activation order | Deploy to GitHub Pages first, change DNS last, so the domain never points at an empty site. |
 
 ## Versions
 

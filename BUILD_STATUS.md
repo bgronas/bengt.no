@@ -8,7 +8,8 @@ Engineering notes for resuming the build. No credentials, no draft text.
 |---|---|
 | Target repository | `bgronas/bengt.no` (project Pages site, custom domain `bengt.no`). `bgronas/bgronas.github.io` is not touched. |
 | Bio text | Minimal: name, neutral topic line, GitHub and LinkedIn links. |
-| `bengt.no` DNS today | Another host or parked. Runbook covers replacing A/AAAA/CNAME, leaving MX/TXT. |
+| `bengt.no` DNS today | Misshosting (source: `test666`). Runbook covers replacing A/AAAA/CNAME, leaving MX/TXT. DNS is changed last. |
+| `bgronas/bengt.no` (2026-11-14) | Placeholder; overwritten by a one-time force push. `bgronas.github.io` and `test666` untouched. |
 | Windows shell | Git Bash, with `publish.cmd` forwarding to `publish.sh`. |
 
 ## Verified versions
@@ -49,6 +50,8 @@ Engineering notes for resuming the build. No credentials, no draft text.
   theme override checks because of CRLF checkout; fixed with LF-normalised text hashes, also in the import
   manifest. `preview` now starts the Hugo binary directly. Open: the first preview build on Windows did not
   finish before it was interrupted; cause unknown. Details: `docs/acceptance-report.md`, section 9.
+- 2026-11-14 later: Author decided to overwrite `bgronas/bengt.no` and start the local copy clean. Runbook and
+  `docs/dns-and-pages.md` rewritten for that route: deploy first, DNS last.
 
 ## Open after this build (external, not code)
 

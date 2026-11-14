@@ -22,6 +22,7 @@ Result classes: **PASS** (run here, passed), **PASS (simulated)** (run here agai
 | 10 | Fresh clone: production build exactly as `deploy.yml` runs it, `build_manifest.py`, `validate_content.py --site public --prune-originals` | PASS |
 | 11 | Fresh clone: update commands of `docs/operations.md` with the current versions | PASS as a no-op (0 files changed). No newer compatible theme or Hugo version existed to update to |
 | 12 | `git ls-remote` of every pinned action tag against its pinned commit | PASS: 7 of 7 match |
+| 13 | Delivery check: `git clone <bundle>`, `./publish.sh setup`, the push procedure against a local stand-in remote, `./publish.sh test`, `check`, `new`, `ship` | PASS (simulated remote): 168 passed, 2 skipped. Run on the commit before this row was added; that commit differs from the delivered one by this row only |
 
 ## 2. Versions
 

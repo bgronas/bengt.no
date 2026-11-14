@@ -28,6 +28,22 @@ Symptom: warning "Enrichment did not complete" in the `process` job. If an artic
 
 Local equivalent: `./publish.sh enrich --dry-run`, then `./publish.sh enrich`.
 
+### Blocked ship
+
+`./publish.sh ship` stops before committing or pushing and changes nothing. It never resets, stashes or force-pushes.
+
+| Message | Action |
+|---|---|
+| "you are on '<branch>'" | `git switch main` |
+| "origin is '…', expected github.com/bgronas/bengt.no" | `git remote set-url origin https://github.com/bgronas/bengt.no.git`. For a fork: `BN_EXPECTED_REPO=<owner>/<repo> ./publish.sh ship "…"` |
+| "cannot fast-forward because your uncommitted changes touch the same files" | The workflow committed generated files to an article you are editing. `git stash`, `git merge --ff-only origin/main`, `git stash pop`, resolve, ship again |
+| "your branch and origin/main have diverged" | `git pull --rebase origin main`, then ship again |
+| "import reported conflicts" | See "Import conflict" below |
+| "validation failed" | The lines above the message name the file and the field |
+| "run ./publish.sh cms-sync" | The taxonomy policy changed. Run it, ship again |
+| "refusing to commit …" or "possible secrets in staged changes" | Remove the file or add it to `.gitignore`. File names are printed, never contents |
+| "push was rejected" | `main` moved after the fetch. Your commit is local and safe: `git pull --rebase origin main`, ship again |
+
 ### Blocked writeback
 
 Symptom: "Commit generated changes" fails.
@@ -121,7 +137,7 @@ When a cap is reached the remaining work is listed as backlog in the report and 
 
 Changing taxonomy: edit `data/taxonomy-policy.yaml`, run `./publish.sh cms-sync`, ship.
 
-## Updates
+## Updating pinned versions
 
 Dependabot (`.github/dependabot.yml`) opens weekly pull requests for GitHub Actions and for Python packages in `uv.lock`. Auto-merge is not configured anywhere. `check.yml` runs on each pull request; merge by hand when it is green. Dependabot is told to ignore `hugo`, and it does not handle the theme submodule or the fonts. Those three are updated by hand.
 

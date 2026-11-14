@@ -221,6 +221,13 @@ billed to the API key's account, separately from any Claude subscription.""",
         try:
             notes = enrich_one(policy, tax, client, bundle, force=args.force)
         except llm.MissingCredentials as exc:
+            for waiting in eligible[position:]:
+                report.add(
+                    waiting.rel(policy.root),
+                    "backlog",
+                    reason="ANTHROPIC_API_KEY is not set",
+                    source_hash=sha256_bytes(waiting.doc.raw),
+                )
             report.emit(policy.root, json_out=args.json)
             print(f"error: {exc}", file=sys.stderr)
             return 3

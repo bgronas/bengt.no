@@ -20,8 +20,8 @@ Sources, read 2026-11-14: GitHub Docs "Managing a custom domain for your GitHub 
 `bgronas/bengt.no` exists and its `main` holds one commit with a `README.md` (observed with `git ls-remote` on 2026-11-14: `979d479`). The steps below add to it and never force-push.
 
 ```bash
-# in the unpacked project folder
-git remote add origin https://github.com/bgronas/bengt.no.git
+# in the project folder cloned from the delivered bundle (docs/runbook.md)
+git remote set-url origin https://github.com/bgronas/bengt.no.git   # `git remote add origin …` if there is no origin yet
 git fetch origin
 git push origin main:blowfish-site          # review branch; starts no workflow
 ```

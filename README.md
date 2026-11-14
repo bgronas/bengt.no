@@ -71,6 +71,7 @@ API commands need `ANTHROPIC_API_KEY` in the environment or in a local `.env` (i
 
 | Topic | File |
 |---|---|
+| Shortest path from the delivered bundle to a live site | [docs/runbook.md](docs/runbook.md) |
 | One-time GitHub, Pages and DNS activation | [docs/dns-and-pages.md](docs/dns-and-pages.md) |
 | Daily authoring, flags, translation, social drafts | [docs/editorial-workflow.md](docs/editorial-workflow.md) |
 | Browser and mobile editing with Pages CMS | [docs/cms.md](docs/cms.md) |

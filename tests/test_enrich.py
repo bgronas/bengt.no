@@ -75,7 +75,9 @@ def test_missing_credentials_fail_clearly_and_leave_files_unchanged(repo: Path, 
     pending(repo)
     state = snapshot(repo)
     assert enrich_post.main([]) == 3
-    assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
+    captured = capsys.readouterr()
+    assert "ANTHROPIC_API_KEY" in captured.err
+    assert "backlog=1" in captured.out and "nothing to do" not in captured.out
     assert snapshot(repo) == state
 
 

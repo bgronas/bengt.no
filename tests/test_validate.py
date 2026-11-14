@@ -194,3 +194,56 @@ def test_secret_scan_reports_names_not_values() -> None:
     found = secret_scan(diff)
     assert found == ["  notes.md: Anthropic API key"]
     assert key not in "".join(found)
+
+
+class FakeLinkClient:
+    """Stand-in for httpx.Client: answers from a table and records every request."""
+
+    def __init__(self, table: dict[str, object]) -> None:
+        self.table = table
+        self.requests: list[tuple[str, str]] = []
+
+    def _answer(self, method: str, url: str) -> object:
+        import httpx
+
+        self.requests.append((method, url))
+        answer = self.table[url]
+        if isinstance(answer, Exception):
+            raise answer
+        return httpx.Response(int(str(answer)), request=httpx.Request(method, url))
+
+    def head(self, url: str) -> object:
+        return self._answer("HEAD", url)
+
+    def get(self, url: str) -> object:
+        return self._answer("GET", url)
+
+
+def test_external_link_check_separates_missing_from_inconclusive_and_is_rate_limited(repo: Path) -> None:
+    import httpx
+
+    body = (
+        "[ok](https://one.example/ok) [gone](https://one.example/gone#part) [blocked](https://two.example/blocked)\n"
+        "[slow](https://three.example/slow) [down](https://four.example/down) [local](other.md)\n\n"
+        "```text\n[in code](https://code.example/never)\n```\n"
+    )
+    write_bundle(repo, "en", "2026-10-01-links", body=body)
+    table: dict[str, object] = {
+        "https://one.example/ok": 200,
+        "https://one.example/gone": 404,
+        "https://two.example/blocked": 403,
+        "https://three.example/slow": httpx.ReadTimeout("slow"),
+        "https://four.example/down": httpx.ConnectError("down"),
+    }
+    client, pauses = FakeLinkClient(table), []
+    report = validate_content.check_links(load_policy(), client=client, sleep=pauses.append)
+    status = {item["path"]: item["status"] for item in report.as_dict()["items"]}
+    assert status == {
+        "https://one.example/ok": "ok",
+        "https://one.example/gone": "missing",
+        "https://two.example/blocked": "inconclusive",
+        "https://three.example/slow": "timeout",
+        "https://four.example/down": "unreachable",
+    }, "only 404 and 410 are proven missing; links in code and local links are not requested"
+    assert ("GET", "https://two.example/blocked") in client.requests, "a refused HEAD is retried as GET"
+    assert len(pauses) == 1 and pauses[0] > 0, "the second request to the same host waits"

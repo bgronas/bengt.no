@@ -31,13 +31,23 @@ Engineering notes for resuming the build. No credentials, no draft text.
 |---|---|---|
 | M1 | Skeleton, pins, bilingual routes, example bundles | Done |
 | M2 | Pages CMS proof and `.pages.yml` | Done (inbox-intake fallback for media) |
-| M3 | Design system and public surfaces | Done, first browser review 2026-11-13 |
+| M3 | Design system and public surfaces | Done; second browser review 2026-11-14 (reading measure corrected) |
 | M4 | Python content services and tests | Done |
-| M5 | CLI, workflows, durable state | Done; one CLI test being repaired |
-| M6 | Verification, acceptance report, docs, packaging | In progress |
+| M5 | CLI, workflows, durable state | Done |
+| M6 | Verification, acceptance report, docs, packaging | Done 2026-11-14 |
 
 ## Log
 
 - 2026-11-13 16:50–22:33: M1–M5 implemented. Interrupted by a usage limit with one failing test
   (`tests/test_publish_sh.py::test_ship_refuses_key_material_and_secrets_without_printing_them`).
 - 2026-11-14 09:40: Resumed from the workspace. This file created.
+- 2026-11-14 10:40–11:20: Second resume. Author confirmed: continue this build, target `bgronas/bengt.no`,
+  delivery as an archive, earlier answers unchanged. Wrote `docs/cms.md`, `operations.md`,
+  `dns-and-pages.md`, `design-system.md`, `acceptance-report.md`. Full verification pass: commands and
+  results in `docs/acceptance-report.md`.
+
+## Open after this build (external, not code)
+
+1. Push and activate: `docs/dns-and-pages.md`. Nothing has been pushed.
+2. First workflow run on GitHub, first live API call, Pages CMS in the hosted application: untested until then.
+3. LCP 2.6 s on list pages in the lab (target 2.5 s): `docs/design-system.md`.

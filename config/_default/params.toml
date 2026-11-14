@@ -22,6 +22,11 @@ defaultSocialImage = "img/default-social.png"
 thumbnailAspectRatio = "1.905"
 fingerprintAlgorithm = "sha512"
 
+# Local parameters read by this repository's own partials and render hooks.
+[bn]
+  imageMaxEdge = 1920   # must equal limits.max_image_edge_px in data/automation-policy.yaml
+  ciPlaceholders = false
+
 [seo]
   metaDescriptionOrder = ["description", "summary", "site"]
 

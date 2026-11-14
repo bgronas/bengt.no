@@ -4,6 +4,18 @@
   "theme_commit": "3e4b25c4dc74d4da0e83ce5b6b3ac3850de40072",
   "overrides": [
     {
+      "local": "layouts/_default/index.json",
+      "upstream": "themes/blowfish/layouts/_default/index.json",
+      "upstream_sha256": "502706f4fcdd624f30e0c973bb8e13336e3e49836f682df9641a48990771bbd1",
+      "reason": "Strictly per-language search index."
+    },
+    {
+      "local": "layouts/_default/rss.xml",
+      "upstream": "themes/blowfish/layouts/_default/rss.xml",
+      "upstream_sha256": "1126493c87522c5baaff8671db93e4585405158ac3ce0717a95ee126c96befb7",
+      "reason": "No link to original feature images; summary as description."
+    },
+    {
       "local": "layouts/partials/head.html",
       "upstream": "themes/blowfish/layouts/partials/head.html",
       "upstream_sha256": "0cb2e019d90b2f3c28ea481168df112c7a1f41b595bc0eb742cd19ce5bfd3846",

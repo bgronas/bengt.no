@@ -1,0 +1,54 @@
+# Operator-managed taxonomy policy. This file is the only place where public
+# categories and tags are defined. Automation proposes; it never adds entries here.
+# After editing, run:  ./publish.sh cms-sync   (regenerates the choices in .pages.yml)
+version: 1
+
+# An article has one or two categories, chosen from this list only.
+categories:
+  - Technology
+  - Sustainability
+  - Cloud Native
+  - Orchestration
+  - Datacenter Management
+  - Home Automation
+  - Personal
+
+tags:
+  # Canonical spellings. Matching is case-insensitive: "python" becomes "Python".
+  canonical:
+    - Hugo
+    - Blowfish
+    - GitHub Actions
+    - Markdown
+    - Python
+    - Web Performance
+    - Accessibility
+    - Home Assistant
+    - Kubernetes
+    - AI
+    - GitOps
+
+  # Unambiguous variants only. Keys are compared case-insensitively.
+  aliases:
+    k8s: Kubernetes
+    kube: Kubernetes
+    github-actions: GitHub Actions
+    gh actions: GitHub Actions
+    git-ops: GitOps
+    hass: Home Assistant
+    home-assistant: Home Assistant
+    homeassistant: Home Assistant
+    a11y: Accessibility
+    web perf: Web Performance
+    webperf: Web Performance
+    artificial intelligence: AI
+
+  # Context-dependent abbreviations. These are never normalised automatically;
+  # validation stops and asks the author to write the intended tag in full.
+  ambiguous:
+    ha:
+      - Home Assistant
+      - High Availability
+    ci:
+      - GitHub Actions
+      - Continuous Integration

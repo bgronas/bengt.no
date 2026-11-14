@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bengt.no/schemas/metadata.schema.json",
+  "title": "MetadataResult",
+  "description": "Structured output for scripts/enrich_post.py. Sent to the API as output_config.format.schema; the categories enum is injected from data/taxonomy-policy.yaml at call time. Length and count rules are enforced locally because structured outputs do not guarantee them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "description",
+    "summary",
+    "keywords",
+    "categories",
+    "tags",
+    "series",
+    "series_order"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Article title in the article language. Used only when the author left the title empty."
+    },
+    "description": {
+      "type": "string",
+      "description": "Faithful SEO description, 150 to 160 characters, in the article language."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One or two sentences for article cards, worded differently from the description."
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "5 to 8 search phrases that the article actually covers."
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "One or two categories from the allowed list."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Up to 7 technically relevant tags; fewer for short articles."
+    },
+    "series": {
+      "type": "string",
+      "description": "Series name stated in the article, or an empty string."
+    },
+    "series_order": {
+      "type": "integer",
+      "description": "Position in the series stated in the article, or 0."
+    }
+  }
+}

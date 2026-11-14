@@ -1,0 +1,29 @@
+# Dependency update pull requests. Auto-merge is not configured anywhere:
+# every update is reviewed and merged by a person after check.yml passes.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Oslo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: deps
+    ignore:
+      # Hugo must stay inside the range the pinned Blowfish release supports.
+      # It is updated together with the theme; see docs/operations.md.
+      - dependency-name: hugo

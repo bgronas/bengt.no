@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bengt.no/schemas/social-draft.schema.json",
+  "title": "SocialDraftResult",
+  "description": "Structured output for scripts/generate_social_drafts.py. The canonical link is appended by the script, never by the model.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "linkedin",
+    "x"
+  ],
+  "properties": {
+    "linkedin": {
+      "type": "string",
+      "description": "LinkedIn draft, about 100 to 180 words, without the link."
+    },
+    "x": {
+      "type": "string",
+      "description": "X draft without the link; the script appends it and checks the weighted length."
+    }
+  }
+}

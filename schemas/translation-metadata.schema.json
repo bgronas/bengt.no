@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bengt.no/schemas/translation-metadata.schema.json",
+  "title": "TranslationMetadataResult",
+  "description": "Structured output for the metadata call of scripts/translate_post.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "slug",
+    "summary",
+    "description",
+    "keywords"
+  ],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Lower-case ASCII slug for the translated title."
+    },
+    "summary": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "150 to 160 characters."
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

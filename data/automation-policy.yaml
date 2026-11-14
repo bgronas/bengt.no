@@ -1,0 +1,109 @@
+# The single policy file for automation controls. Validated against
+# schemas/policy.schema.json by every script before it does anything.
+# Documentation: docs/operations.md ("Automation policy").
+version: 1
+
+languages: [no, en]
+default_language: no
+timezone: Europe/Oslo
+posts_section: posts
+content_roots:
+  no: content/no
+  en: content/en
+inbox_roots:
+  no: inbox/no
+  en: inbox/en
+intake_media_dir: inbox/media
+site_origin: https://bengt.no
+repository: bgronas/bengt.no
+branch: main
+state_branch: automation-state
+
+taxonomy:
+  source: data/taxonomy-policy.yaml
+  categories_min: 1
+  categories_max: 2
+  tags_max: 7
+  keywords_max: 8
+  new_tags: report        # report | reject. Proposed tags never join the policy automatically.
+
+metadata:
+  description_min_chars: 150
+  description_max_chars: 160
+  summary_max_chars: 320
+  title_max_chars: 110
+
+limits:
+  max_markdown_bytes: 400000
+  max_image_bytes: 15000000
+  max_image_edge_px: 1920
+  max_passthrough_image_bytes: 3000000
+  allow_remote_images: false
+
+api:
+  default_model: claude-sonnet-5-5
+  timeout_seconds: 120
+  max_retries: 3
+  backoff_base_seconds: 2.0
+  backoff_max_seconds: 30.0
+
+# Hard caps per script run. When a cap is reached the remaining work is
+# reported as backlog and no success flag is written for it.
+budgets:
+  max_calls_per_run: 40
+  max_total_tokens_per_run: 600000
+  max_input_chars_per_call: 60000
+
+enrichment:
+  enabled: true
+  max_articles_per_run: 10
+  max_output_tokens: 2000
+
+translation:
+  enabled: true
+  max_articles_per_run: 2
+  chunk_chars: 9000
+  max_chunks_per_article: 14
+  max_output_tokens: 16000
+  metadata_max_output_tokens: 2000
+  glossary:
+    - cluster
+    - LCM
+    - Life Cycle Management
+    - Kubernetes
+    - GitOps
+    - Markdown
+    - GitHub Actions
+    - page bundle
+    - front matter
+    - workflow
+    - deploy
+
+social:
+  enabled: true
+  max_drafts_per_run: 5
+  max_output_tokens: 1500
+  linkedin_min_words: 100
+  linkedin_max_words: 180
+  x_max_weighted_length: 280
+  artifact_retention_days: 30
+  verify_attempts: 8
+  verify_delay_seconds: 15
+
+cards:
+  enabled: true
+  width: 1200
+  height: 630
+  min_title_px: 44
+  max_title_px: 84
+  max_title_lines: 4
+
+external_links:
+  timeout_seconds: 10
+  max_urls: 150
+  per_host_delay_seconds: 1.0
+
+# Recurring work is off. Enabling it requires editing the workflow as well;
+# see docs/operations.md ("Scheduled publication").
+maintenance:
+  scheduled_build: false

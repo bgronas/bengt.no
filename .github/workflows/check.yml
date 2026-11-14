@@ -1,0 +1,94 @@
+name: Check
+
+# Read-only validation for pull requests and on demand. This workflow has no
+# access to secrets, never writes to the repository and never deploys.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: Pages CMS payload as JSON (set by the CMS "Run checks" button; leave empty otherwise)
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TZ: Europe/Oslo
+
+jobs:
+  check:
+    name: Lint, test and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up tools
+        uses: ./.github/actions/setup
+
+      - name: Lint and type check
+        run: |
+          set -euo pipefail
+          uv run --frozen ruff check scripts tests
+          uv run --frozen ruff format --check scripts tests
+          uv run --frozen mypy
+          uv run --frozen check-jsonschema --builtin-schema vendor.github-workflows .github/workflows/*.yml
+          uv run --frozen check-jsonschema --builtin-schema vendor.dependabot .github/dependabot.yml
+
+      - name: Tests (Anthropic API mocked)
+        run: uv run --frozen pytest
+
+      - name: Validate content
+        run: |
+          set -euo pipefail
+          uv run --frozen python scripts/validate_content.py --allow-pending --summary "$GITHUB_STEP_SUMMARY"
+          uv run --frozen python scripts/optimize_images.py
+          uv run --frozen python scripts/sync_cms_schema.py --check
+          uv run --frozen python scripts/enrich_post.py --dry-run
+          uv run --frozen python scripts/translate_post.py --status
+
+      - name: Production build (no API, isolated output)
+        env:
+          HUGO_PARAMS_BN_CIPLACEHOLDERS: "true"
+        run: |
+          set -euo pipefail
+          uv run --frozen hugo --gc --minify --buildDrafts=false --buildFuture=false --buildExpired=false --destination "$RUNNER_TEMP/public"
+          uv run --frozen python scripts/build_manifest.py --site "$RUNNER_TEMP/public"
+          uv run --frozen python scripts/validate_content.py --site "$RUNNER_TEMP/public" --prune-originals
+
+      - name: Draft preview build (artifact only, never deployed)
+        run: |
+          set -euo pipefail
+          uv run --frozen hugo --buildDrafts --buildFuture --baseURL "http://localhost:8000/" --destination "$RUNNER_TEMP/preview" --quiet
+          printf 'User-agent: *\nDisallow: /\n' > "$RUNNER_TEMP/preview/robots.txt"
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: draft-preview-${{ github.run_id }}
+          path: ${{ runner.temp }}/preview
+          retention-days: 5
+          if-no-files-found: error
+
+      - name: Summary
+        run: |
+          {
+            echo "### Checks passed"
+            echo ""
+            echo "The draft preview is the workflow artifact \`draft-preview-${GITHUB_RUN_ID}\` (kept 5 days)."
+            echo "Download it, unzip it and run \`python -m http.server 8000\` inside the folder."
+            echo "It is not deployed anywhere. Anyone who can read this repository's Actions can download it."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -151,24 +151,24 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anthropic" },
-    { name = "httpx" },
-    { name = "hugo" },
-    { name = "jsonschema" },
-    { name = "markdown-it-py" },
-    { name = "pillow" },
-    { name = "pydantic" },
-    { name = "python-frontmatter" },
-    { name = "pyyaml" },
+    { name = "anthropic", specifier = ">=2.8,<3" },
+    { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "hugo", specifier = "==0.169.0" },
+    { name = "jsonschema", specifier = ">=4.26,<5" },
+    { name = "markdown-it-py", specifier = ">=4.3,<5" },
+    { name = "pillow", specifier = ">=13,<14" },
+    { name = "pydantic", specifier = ">=2.14,<3" },
+    { name = "python-frontmatter", specifier = ">=1.3,<2" },
+    { name = "pyyaml", specifier = ">=6.0.3,<7" },
 ]
 
 [package.metadata.requires-dev]
-browser = [{ name = "playwright" }]
+browser = [{ name = "playwright", specifier = ">=1.65" }]
 dev = [
-    { name = "check-jsonschema" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "ruff" },
+    { name = "check-jsonschema", specifier = ">=0.39" },
+    { name = "mypy", specifier = ">=2.4" },
+    { name = "pytest", specifier = ">=9.2" },
+    { name = "ruff", specifier = ">=0.17" },
     { name = "types-jsonschema" },
     { name = "types-pyyaml" },
 ]

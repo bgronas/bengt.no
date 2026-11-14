@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bengt.no/schemas/publication-manifest.schema.json",
+  "title": "PublicationManifest",
+  "description": "Deployed at /publication-manifest.json. Lists only pages Hugo rendered for production. Contains no draft information and no article text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "site_origin",
+    "content_commit",
+    "hugo_version",
+    "pages"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "site_origin": {
+      "type": "string",
+      "pattern": "^https://[^/]+$"
+    },
+    "content_commit": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{40}|unknown)$"
+    },
+    "hugo_version": {
+      "type": "string"
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "lang",
+          "translation_key",
+          "permalink",
+          "source_path",
+          "title",
+          "date",
+          "lastmod",
+          "content_hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z]{2}:[a-z0-9_-]+$"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "translation_key": {
+            "type": "string"
+          },
+          "permalink": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "source_path": {
+            "type": "string",
+            "pattern": "^content/[a-z]{2}/posts/[^/]+/index\\.md$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "lastmod": {
+            "type": "string"
+          },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "background_color": "#1c1f21",
+  "display": "browser",
+  "icons": [
+    {
+      "sizes": "192x192",
+      "src": "/android-chrome-192x192.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "512x512",
+      "src": "/android-chrome-512x512.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "Bengt Grønås",
+  "short_name": "bengt.no",
+  "theme_color": "#1c1f21"
+}

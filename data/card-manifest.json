@@ -1,0 +1,15 @@
+{
+  "cards": {
+    "content/en/posts/2026-11-13-how-this-site-is-published/feature.webp": {
+      "generator": "cards-1",
+      "input_hash": "sha256:c1cbe27a1afc8dacac47347ad0617420f5a49aff43a3166d66c3b9e4f003f754",
+      "output_sha256": "e7e12662a073177961c91c2369b38a55ea0b93778d1fee7e30a6a7460746c52f"
+    },
+    "content/no/posts/2026-11-13-slik-publiseres-dette-nettstedet/feature.webp": {
+      "generator": "cards-1",
+      "input_hash": "sha256:7f0b75b3e7667c903f93be89656e8a91ba98ea8c5223a11d5673b4785edc090f",
+      "output_sha256": "d30bd59fb240300736a43a5dd6ae0af3dec339ff8cf724f76015383b43079761"
+    }
+  },
+  "version": 1
+}

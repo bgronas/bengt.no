@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bengt.no/schemas/translation.schema.json",
+  "title": "TranslationChunkResult",
+  "description": "Structured output for one chunk of scripts/translate_post.py. Every input segment id must come back exactly once.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "segments"
+  ],
+  "properties": {
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

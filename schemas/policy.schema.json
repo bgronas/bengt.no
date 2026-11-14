@@ -1,0 +1,608 @@
+{
+  "$id": "https://bengt.no/schemas/policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "automation": {
+    "$defs": {
+      "ApiSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "backoff_base_seconds": {
+            "exclusiveMinimum": 0,
+            "title": "Backoff Base Seconds",
+            "type": "number"
+          },
+          "backoff_max_seconds": {
+            "exclusiveMinimum": 0,
+            "title": "Backoff Max Seconds",
+            "type": "number"
+          },
+          "default_model": {
+            "minLength": 1,
+            "title": "Default Model",
+            "type": "string"
+          },
+          "max_retries": {
+            "maximum": 10,
+            "minimum": 0,
+            "title": "Max Retries",
+            "type": "integer"
+          },
+          "timeout_seconds": {
+            "exclusiveMinimum": 0,
+            "title": "Timeout Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "default_model",
+          "timeout_seconds",
+          "max_retries",
+          "backoff_base_seconds",
+          "backoff_max_seconds"
+        ],
+        "title": "ApiSettings",
+        "type": "object"
+      },
+      "Budgets": {
+        "additionalProperties": false,
+        "properties": {
+          "max_calls_per_run": {
+            "minimum": 1,
+            "title": "Max Calls Per Run",
+            "type": "integer"
+          },
+          "max_input_chars_per_call": {
+            "minimum": 1,
+            "title": "Max Input Chars Per Call",
+            "type": "integer"
+          },
+          "max_total_tokens_per_run": {
+            "minimum": 1,
+            "title": "Max Total Tokens Per Run",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "max_calls_per_run",
+          "max_total_tokens_per_run",
+          "max_input_chars_per_call"
+        ],
+        "title": "Budgets",
+        "type": "object"
+      },
+      "CardSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "height": {
+            "minimum": 315,
+            "title": "Height",
+            "type": "integer"
+          },
+          "max_title_lines": {
+            "minimum": 1,
+            "title": "Max Title Lines",
+            "type": "integer"
+          },
+          "max_title_px": {
+            "minimum": 24,
+            "title": "Max Title Px",
+            "type": "integer"
+          },
+          "min_title_px": {
+            "minimum": 24,
+            "title": "Min Title Px",
+            "type": "integer"
+          },
+          "width": {
+            "minimum": 600,
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "width",
+          "height",
+          "min_title_px",
+          "max_title_px",
+          "max_title_lines"
+        ],
+        "title": "CardSettings",
+        "type": "object"
+      },
+      "EnrichmentSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "max_articles_per_run": {
+            "minimum": 1,
+            "title": "Max Articles Per Run",
+            "type": "integer"
+          },
+          "max_output_tokens": {
+            "minimum": 1,
+            "title": "Max Output Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "max_articles_per_run",
+          "max_output_tokens"
+        ],
+        "title": "EnrichmentSettings",
+        "type": "object"
+      },
+      "ExternalLinkSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "max_urls": {
+            "minimum": 1,
+            "title": "Max Urls",
+            "type": "integer"
+          },
+          "per_host_delay_seconds": {
+            "minimum": 0,
+            "title": "Per Host Delay Seconds",
+            "type": "number"
+          },
+          "timeout_seconds": {
+            "exclusiveMinimum": 0,
+            "title": "Timeout Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "timeout_seconds",
+          "max_urls",
+          "per_host_delay_seconds"
+        ],
+        "title": "ExternalLinkSettings",
+        "type": "object"
+      },
+      "Limits": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_remote_images": {
+            "title": "Allow Remote Images",
+            "type": "boolean"
+          },
+          "max_image_bytes": {
+            "minimum": 1,
+            "title": "Max Image Bytes",
+            "type": "integer"
+          },
+          "max_image_edge_px": {
+            "minimum": 1,
+            "title": "Max Image Edge Px",
+            "type": "integer"
+          },
+          "max_markdown_bytes": {
+            "minimum": 1,
+            "title": "Max Markdown Bytes",
+            "type": "integer"
+          },
+          "max_passthrough_image_bytes": {
+            "minimum": 1,
+            "title": "Max Passthrough Image Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "max_markdown_bytes",
+          "max_image_bytes",
+          "max_image_edge_px",
+          "max_passthrough_image_bytes",
+          "allow_remote_images"
+        ],
+        "title": "Limits",
+        "type": "object"
+      },
+      "Maintenance": {
+        "additionalProperties": false,
+        "properties": {
+          "scheduled_build": {
+            "title": "Scheduled Build",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "scheduled_build"
+        ],
+        "title": "Maintenance",
+        "type": "object"
+      },
+      "MetadataSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "description_max_chars": {
+            "minimum": 1,
+            "title": "Description Max Chars",
+            "type": "integer"
+          },
+          "description_min_chars": {
+            "minimum": 1,
+            "title": "Description Min Chars",
+            "type": "integer"
+          },
+          "summary_max_chars": {
+            "minimum": 1,
+            "title": "Summary Max Chars",
+            "type": "integer"
+          },
+          "title_max_chars": {
+            "minimum": 1,
+            "title": "Title Max Chars",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description_min_chars",
+          "description_max_chars",
+          "summary_max_chars",
+          "title_max_chars"
+        ],
+        "title": "MetadataSettings",
+        "type": "object"
+      },
+      "SocialSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_retention_days": {
+            "maximum": 90,
+            "minimum": 1,
+            "title": "Artifact Retention Days",
+            "type": "integer"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "linkedin_max_words": {
+            "minimum": 1,
+            "title": "Linkedin Max Words",
+            "type": "integer"
+          },
+          "linkedin_min_words": {
+            "minimum": 1,
+            "title": "Linkedin Min Words",
+            "type": "integer"
+          },
+          "max_drafts_per_run": {
+            "minimum": 1,
+            "title": "Max Drafts Per Run",
+            "type": "integer"
+          },
+          "max_output_tokens": {
+            "minimum": 1,
+            "title": "Max Output Tokens",
+            "type": "integer"
+          },
+          "verify_attempts": {
+            "minimum": 1,
+            "title": "Verify Attempts",
+            "type": "integer"
+          },
+          "verify_delay_seconds": {
+            "minimum": 0,
+            "title": "Verify Delay Seconds",
+            "type": "number"
+          },
+          "x_max_weighted_length": {
+            "minimum": 1,
+            "title": "X Max Weighted Length",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "max_drafts_per_run",
+          "max_output_tokens",
+          "linkedin_min_words",
+          "linkedin_max_words",
+          "x_max_weighted_length",
+          "artifact_retention_days",
+          "verify_attempts",
+          "verify_delay_seconds"
+        ],
+        "title": "SocialSettings",
+        "type": "object"
+      },
+      "TaxonomySettings": {
+        "additionalProperties": false,
+        "properties": {
+          "categories_max": {
+            "minimum": 1,
+            "title": "Categories Max",
+            "type": "integer"
+          },
+          "categories_min": {
+            "minimum": 0,
+            "title": "Categories Min",
+            "type": "integer"
+          },
+          "keywords_max": {
+            "minimum": 1,
+            "title": "Keywords Max",
+            "type": "integer"
+          },
+          "new_tags": {
+            "enum": [
+              "report",
+              "reject"
+            ],
+            "title": "New Tags",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "tags_max": {
+            "minimum": 1,
+            "title": "Tags Max",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source",
+          "categories_min",
+          "categories_max",
+          "tags_max",
+          "keywords_max",
+          "new_tags"
+        ],
+        "title": "TaxonomySettings",
+        "type": "object"
+      },
+      "TranslationSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_chars": {
+            "minimum": 500,
+            "title": "Chunk Chars",
+            "type": "integer"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "glossary": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Glossary",
+            "type": "array"
+          },
+          "max_articles_per_run": {
+            "minimum": 1,
+            "title": "Max Articles Per Run",
+            "type": "integer"
+          },
+          "max_chunks_per_article": {
+            "minimum": 1,
+            "title": "Max Chunks Per Article",
+            "type": "integer"
+          },
+          "max_output_tokens": {
+            "minimum": 1,
+            "title": "Max Output Tokens",
+            "type": "integer"
+          },
+          "metadata_max_output_tokens": {
+            "minimum": 1,
+            "title": "Metadata Max Output Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "max_articles_per_run",
+          "chunk_chars",
+          "max_chunks_per_article",
+          "max_output_tokens",
+          "metadata_max_output_tokens",
+          "glossary"
+        ],
+        "title": "TranslationSettings",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "api": {
+        "$ref": "#/$defs/ApiSettings"
+      },
+      "branch": {
+        "minLength": 1,
+        "title": "Branch",
+        "type": "string"
+      },
+      "budgets": {
+        "$ref": "#/$defs/Budgets"
+      },
+      "cards": {
+        "$ref": "#/$defs/CardSettings"
+      },
+      "content_roots": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "title": "Content Roots",
+        "type": "object"
+      },
+      "default_language": {
+        "title": "Default Language",
+        "type": "string"
+      },
+      "enrichment": {
+        "$ref": "#/$defs/EnrichmentSettings"
+      },
+      "external_links": {
+        "$ref": "#/$defs/ExternalLinkSettings"
+      },
+      "inbox_roots": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "title": "Inbox Roots",
+        "type": "object"
+      },
+      "intake_media_dir": {
+        "title": "Intake Media Dir",
+        "type": "string"
+      },
+      "languages": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Languages",
+        "type": "array"
+      },
+      "limits": {
+        "$ref": "#/$defs/Limits"
+      },
+      "maintenance": {
+        "$ref": "#/$defs/Maintenance"
+      },
+      "metadata": {
+        "$ref": "#/$defs/MetadataSettings"
+      },
+      "posts_section": {
+        "title": "Posts Section",
+        "type": "string"
+      },
+      "repository": {
+        "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+        "title": "Repository",
+        "type": "string"
+      },
+      "site_origin": {
+        "title": "Site Origin",
+        "type": "string"
+      },
+      "social": {
+        "$ref": "#/$defs/SocialSettings"
+      },
+      "state_branch": {
+        "minLength": 1,
+        "title": "State Branch",
+        "type": "string"
+      },
+      "taxonomy": {
+        "$ref": "#/$defs/TaxonomySettings"
+      },
+      "timezone": {
+        "title": "Timezone",
+        "type": "string"
+      },
+      "translation": {
+        "$ref": "#/$defs/TranslationSettings"
+      },
+      "version": {
+        "const": 1,
+        "title": "Version",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "version",
+      "languages",
+      "default_language",
+      "timezone",
+      "posts_section",
+      "content_roots",
+      "inbox_roots",
+      "intake_media_dir",
+      "site_origin",
+      "repository",
+      "branch",
+      "state_branch",
+      "taxonomy",
+      "metadata",
+      "limits",
+      "api",
+      "budgets",
+      "enrichment",
+      "translation",
+      "social",
+      "cards",
+      "external_links",
+      "maintenance"
+    ],
+    "title": "Policy",
+    "type": "object"
+  },
+  "description": "automation: data/automation-policy.yaml. taxonomy: data/taxonomy-policy.yaml.",
+  "taxonomy": {
+    "$defs": {
+      "TagPolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Aliases",
+            "type": "object"
+          },
+          "ambiguous": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Ambiguous",
+            "type": "object"
+          },
+          "canonical": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Canonical",
+            "type": "array"
+          }
+        },
+        "required": [
+          "canonical"
+        ],
+        "title": "TagPolicy",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "categories": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Categories",
+        "type": "array"
+      },
+      "tags": {
+        "$ref": "#/$defs/TagPolicy"
+      },
+      "version": {
+        "const": 1,
+        "title": "Version",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "version",
+      "categories",
+      "tags"
+    ],
+    "title": "TaxonomyPolicy",
+    "type": "object"
+  },
+  "title": "Automation policy"
+}

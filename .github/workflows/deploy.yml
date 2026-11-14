@@ -1,0 +1,396 @@
+name: Publish
+
+# Process content, commit generated files, build and deploy that exact commit,
+# then write social drafts for articles confirmed live. One run does all of it;
+# the bot commit does not start a second run (see docs/architecture.md).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "full = process, build, deploy, social drafts. social-only = retry drafts for the live site. social-baseline = mark live articles as handled."
+        type: choice
+        options: [full, social-only, social-baseline]
+        default: full
+      regenerate:
+        description: "Social drafts to regenerate: permalinks or content/<lang>/posts/<bundle>/index.md, comma separated"
+        type: string
+        default: ""
+      payload:
+        description: Pages CMS payload as JSON (set by a CMS action button; leave empty otherwise)
+        type: string
+        default: ""
+
+# No default permissions. Each job requests only what it needs.
+permissions: {}
+
+# One publish run at a time, never cancelled midway. GitHub keeps at most one
+# pending run per group: a newer queued run replaces an older queued run.
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+
+env:
+  TZ: Europe/Oslo
+  SITE_ORIGIN: https://bengt.no
+  STATE_BRANCH: automation-state
+  BOT_NAME: github-actions[bot]
+  BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+jobs:
+  prepare:
+    name: Validate trigger
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.dispatch.outputs.mode }}
+      regenerate: ${{ steps.dispatch.outputs.regenerate }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/lib
+      - name: Validate inputs and branch
+        id: dispatch
+        env:
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_REGENERATE: ${{ inputs.regenerate }}
+          INPUT_PAYLOAD: ${{ inputs.payload }}
+        run: python3 scripts/lib/dispatch.py
+
+  process:
+    name: Process content
+    needs: prepare
+    if: needs.prepare.outputs.mode == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write # commit generated metadata, translations and cards back to main
+    outputs:
+      content_sha: ${{ steps.commit.outputs.content_sha }}
+    steps:
+      # The current tip of main, not the event SHA: an earlier run of this
+      # workflow may have committed generated files since this run was queued.
+      - name: Check out the tip of main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/heads/main
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up tools
+        uses: ./.github/actions/setup
+
+      - name: Import inbox drafts
+        run: uv run --frozen python scripts/import_drafts.py
+
+      - name: Structural preflight
+        run: uv run --frozen python scripts/validate_content.py --allow-pending
+
+      - name: Enrich opted-in metadata
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+        run: |
+          set -euo pipefail
+          status=0
+          uv run --frozen python scripts/enrich_post.py || status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "::warning::Enrichment did not complete (exit $status). Articles with draft: false that still lack metadata will stop the deployment at final validation."
+          fi
+
+      - name: Create requested translation drafts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+        run: |
+          set -euo pipefail
+          status=0
+          uv run --frozen python scripts/translate_post.py || status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "::warning::A requested translation failed (exit $status). The request is kept and retried on the next run; publication of other articles continues."
+            echo "### Translation pending" >> "$GITHUB_STEP_SUMMARY"
+            echo "A requested translation failed and stays requested. See the step log for the reason." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Detect math and Mermaid, render title cards, audit images
+        run: |
+          set -euo pipefail
+          uv run --frozen python scripts/detect_features.py
+          uv run --frozen python scripts/generate_cards.py
+          uv run --frozen python scripts/optimize_images.py
+
+      - name: Final production validation
+        run: |
+          set -euo pipefail
+          uv run --frozen python scripts/sync_cms_schema.py --check
+          uv run --frozen python scripts/validate_content.py --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Tests
+        run: uv run --frozen pytest -m "not hugo and not browser and not api"
+
+      - name: Commit generated changes (no force, no recursion)
+        id: commit
+        run: |
+          set -euo pipefail
+          # Only the paths automation is allowed to write. Never `git add .`.
+          git add -- content data/import-manifest.json data/card-manifest.json
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" \
+              commit --quiet -m "Process content: generated metadata and assets [skip ci]"
+            # A plain push. If main moved since this run started, the push is
+            # rejected and the run stops here: nothing stale is deployed and
+            # nobody's commit is overwritten.
+            if ! git push origin "HEAD:refs/heads/main"; then
+              echo "::error::main advanced during processing. Nothing was deployed. The newer push starts its own run."
+              exit 1
+            fi
+          fi
+          if [ "$(git rev-parse HEAD)" != "$(git ls-remote origin refs/heads/main | cut -f1)" ]; then
+            echo "::error::main advanced during processing. Nothing was deployed. The newer push starts its own run."
+            exit 1
+          fi
+          echo "content_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Content commit: \`$(git rev-parse HEAD)\` (event commit: \`${GITHUB_SHA}\`)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload processing reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: processing-reports-${{ github.run_id }}
+          path: reports/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  build:
+    name: Build site
+    needs: [prepare, process]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the processed content commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.process.outputs.content_sha }}
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up tools
+        uses: ./.github/actions/setup
+
+      - name: Restore Hugo resource cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: resources/_gen
+          key: hugo-resources-${{ runner.os }}-${{ hashFiles('uv.lock', '.gitmodules', 'config/_default/*.toml') }}-${{ github.run_id }}
+          restore-keys: |
+            hugo-resources-${{ runner.os }}-${{ hashFiles('uv.lock', '.gitmodules', 'config/_default/*.toml') }}-
+
+      - name: Build with Hugo
+        env:
+          HUGO_ENVIRONMENT: production
+          HUGO_PARAMS_BUILDCOMMIT: ${{ needs.process.outputs.content_sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$HUGO_PARAMS_BUILDCOMMIT"
+          uv run --frozen hugo --gc --minify --buildDrafts=false --buildFuture=false --buildExpired=false
+
+      - name: Publication manifest and site validation
+        env:
+          CONTENT_SHA: ${{ needs.process.outputs.content_sha }}
+        run: |
+          set -euo pipefail
+          uv run --frozen python scripts/build_manifest.py --site public --commit "$CONTENT_SHA"
+          uv run --frozen python scripts/validate_content.py --site public --prune-originals
+          cp public/publication-manifest.json "$RUNNER_TEMP/publication-manifest.json"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: public
+
+      - name: Upload publication manifest
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: publication-manifest
+          path: ${{ runner.temp }}/publication-manifest.json
+          retention-days: 7
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: [process, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      pages: write # deploy the Pages artifact
+      id-token: write # prove the deployment's origin to Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  social:
+    name: Social drafts
+    needs: [prepare, process, build, deploy]
+    # After a successful deployment, or on its own for the two social modes.
+    # A failed, skipped or cancelled deployment never reaches this job in full mode.
+    if: >-
+      ${{ always() && needs.prepare.result == 'success' &&
+          ((needs.prepare.outputs.mode == 'full' && needs.deploy.result == 'success') ||
+           needs.prepare.outputs.mode == 'social-only' || needs.prepare.outputs.mode == 'social-baseline') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write # automation-state branch, and clearing fulfilled social.regenerate flags on main
+    steps:
+      - name: Resolve the deployed content commit
+        id: live
+        env:
+          MODE: ${{ needs.prepare.outputs.mode }}
+          FULL_SHA: ${{ needs.process.outputs.content_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = "full" ]; then
+            commit="$FULL_SHA"
+          else
+            curl --fail --silent --show-error --location --max-time 30 \
+              "$SITE_ORIGIN/publication-manifest.json" -o "$RUNNER_TEMP/publication-manifest.json"
+            commit="$(jq -r '.content_commit' "$RUNNER_TEMP/publication-manifest.json")"
+          fi
+          if ! printf '%s' "$commit" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::Could not determine the deployed content commit."
+            exit 1
+          fi
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the deployed content commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.live.outputs.commit }}
+          fetch-depth: 0
+
+      - name: Set up tools
+        uses: ./.github/actions/setup
+
+      - name: Download the manifest of this deployment
+        if: needs.prepare.outputs.mode == 'full'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: publication-manifest
+          path: ${{ runner.temp }}
+
+      - name: Check out durable state
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            git fetch --quiet origin "+refs/heads/$STATE_BRANCH:refs/remotes/origin/$STATE_BRANCH"
+            git worktree add --quiet -B "$STATE_BRANCH" .state "origin/$STATE_BRANCH"
+          else
+            git worktree add --quiet --detach .state
+            git -C .state switch --quiet --orphan "$STATE_BRANCH"
+            {
+              echo "# Automation state"
+              echo ""
+              echo "Written by the Publish workflow. Do not merge this branch into main and do not edit it by hand."
+              echo "It holds publication identities, hashes, draft status and artifact references. It holds no draft text."
+            } > .state/README.md
+          fi
+
+      - name: Verify the deployment and write drafts
+        id: drafts
+        if: needs.prepare.outputs.mode != 'social-baseline'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+          REGENERATE: ${{ needs.prepare.outputs.regenerate }}
+        run: |
+          set -euo pipefail
+          status=0
+          uv run --frozen python scripts/generate_social_drafts.py run \
+            --manifest "$RUNNER_TEMP/publication-manifest.json" \
+            --state-dir .state \
+            --regenerate "$REGENERATE" \
+            --artifact-name "social-drafts-${GITHUB_RUN_ID}" \
+            --run-id "$GITHUB_RUN_ID" \
+            --summary "$GITHUB_STEP_SUMMARY" || status=$?
+          if [ "$status" -eq 4 ]; then
+            echo "::warning::Site deployed; social drafts pending. Re-run this job or dispatch the workflow with mode social-only."
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+          elif [ "$status" -ne 0 ]; then
+            exit "$status"
+          fi
+
+      - name: Record baseline without drafts
+        if: needs.prepare.outputs.mode == 'social-baseline'
+        run: |
+          uv run --frozen python scripts/generate_social_drafts.py baseline \
+            --manifest "$RUNNER_TEMP/publication-manifest.json" --state-dir .state
+
+      - name: Upload social drafts (not part of the site)
+        if: needs.prepare.outputs.mode != 'social-baseline'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: social-drafts-${{ github.run_id }}
+          path: social-drafts/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Persist state
+        run: |
+          set -euo pipefail
+          cd .state
+          git add -A
+          if git diff --cached --quiet; then
+            echo "State unchanged."
+            exit 0
+          fi
+          git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" commit --quiet -m "Update publication state [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:refs/heads/$STATE_BRANCH"; then
+              exit 0
+            fi
+            git fetch --quiet origin "+refs/heads/$STATE_BRANCH:refs/remotes/origin/$STATE_BRANCH"
+            git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" rebase "origin/$STATE_BRANCH"
+          done
+          echo "::error::Could not store state on $STATE_BRANCH after 3 attempts."
+          exit 1
+
+      - name: Clear fulfilled regeneration requests on main
+        if: needs.prepare.outputs.mode != 'social-baseline'
+        run: |
+          set -euo pipefail
+          if [ ! -s reports/social.json ] || [ "$(jq '.clear_flags | length' reports/social.json)" -eq 0 ]; then
+            exit 0
+          fi
+          cp reports/social.json "$RUNNER_TEMP/social.json"
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            git checkout --quiet --detach origin/main
+            uv run --frozen python scripts/generate_social_drafts.py clear --report "$RUNNER_TEMP/social.json"
+            git add -- content
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" \
+              commit --quiet -m "Clear fulfilled social regeneration requests [skip ci]"
+            if git push origin "HEAD:refs/heads/main"; then
+              exit 0
+            fi
+            # main moved between fetch and push. Start again from the new tip.
+            # This workspace is a throwaway CI checkout; nothing of the author's is here.
+            git reset --quiet --hard origin/main
+          done
+          echo "::warning::Could not clear social.regenerate on main; it stays set and is cleared on the next run. No duplicate draft will be written."

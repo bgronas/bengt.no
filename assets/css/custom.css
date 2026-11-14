@@ -7,7 +7,7 @@
   --font-sans: "Roboto", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
-  --bn-measure: 72ch;
+  --bn-measure: 58ch;
   --bn-wide: 96ch;
   --bn-radius: 0.5rem;
   --bn-step--1: 0.875rem;

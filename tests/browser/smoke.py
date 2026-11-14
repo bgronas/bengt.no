@@ -24,6 +24,24 @@ WIDTHS = {"375": (375, 812), "768": (768, 1024), "1440": (1440, 900)}
 PAGES = ["/", "/en/", "/posts/", "/en/posts/", "/om/", "/en/about/", "/series/", "/en/tags/", "/404.html"]
 AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
 
+# Characters that fit on one full line of each long paragraph: column width divided by the
+# paragraph's own average glyph width.
+MEASURE_JS = """() => {
+  const out = [];
+  for (const p of document.querySelectorAll('.article-content > p')) {
+    const text = p.innerText;
+    if (text.length < 200) continue;
+    const probe = document.createElement('span');
+    probe.style.cssText = 'white-space:nowrap;position:absolute;visibility:hidden';
+    probe.textContent = text;
+    p.appendChild(probe);
+    const average = probe.getBoundingClientRect().width / text.length;
+    probe.remove();
+    out.push(Math.round(p.getBoundingClientRect().width / average));
+  }
+  return out;
+}"""
+
 failures: list[str] = []
 notes: list[str] = []
 
@@ -86,6 +104,11 @@ def article_checks(browser: Browser, base: str, article: str) -> None:
     page.goto(base + article, wait_until="networkidle")
 
     check(page.locator("h1").count() == 1, "article has exactly one h1")
+    measure = page.evaluate(MEASURE_JS)
+    check(
+        bool(measure) and all(60 <= m <= 80 for m in measure),
+        f"reading measure is 60 to 80 characters per full line at 1440 px ({measure})",
+    )
     check(page.locator("script[src*='mermaid']").count() == 0, "Mermaid is not fetched before a diagram is near")
     toc = page.locator("#TableOfContents a")
     check(toc.count() >= 3, f"desktop table of contents lists headings ({toc.count()})")

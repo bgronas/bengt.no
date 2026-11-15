@@ -173,7 +173,9 @@ Source: the author's terminal output from Git Bash (MINGW64), Git 2.55.0.windows
 
 Found by reasoning from the first defect, not observed: the import manifest had the same line-ending dependency and would have reported a conflict on the runner for an inbox file saved with CRLF. Fixed and tested (`test_import::test_windows_line_endings_do_not_turn_into_a_conflict_on_the_runner`).
 
-The fixes were verified on Linux only. They have not been run on Windows.
+The fixes were verified on Linux by the build session.
+
+2026-11-15, reported by the author without terminal output: after a clean clone of the v3 bundle on the same Windows machine, `./publish.sh setup` (doctor) and `./publish.sh preview` were "100% OK". That closes the two rows above as far as an author report can; the cause of the first interrupted preview stays unexplained and did not recur.
 
 ## 10. Repository tree
 
@@ -244,6 +246,7 @@ docs/decisions.md
 docs/design-system.md
 docs/dns-and-pages.md
 docs/editorial-workflow.md
+docs/handover.md
 docs/operations.md
 docs/runbook.md
 i18n/en.yaml

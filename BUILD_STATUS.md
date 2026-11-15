@@ -52,6 +52,8 @@ Engineering notes for resuming the build. No credentials, no draft text.
   finish before it was interrupted; cause unknown. Details: `docs/acceptance-report.md`, section 9.
 - 2026-11-14 later: Author decided to overwrite `bgronas/bengt.no` and start the local copy clean. Runbook and
   `docs/dns-and-pages.md` rewritten for that route: deploy first, DNS last.
+- 2026-11-15: Author reports `doctor` and `preview` fine on Windows from a clean clone of v3. Wrote
+  `docs/handover.md` (decisions, order of work, traps, prompts for resuming or rebuilding).
 
 ## Open after this build (external, not code)
 

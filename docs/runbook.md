@@ -17,7 +17,7 @@ mv bengt.no bengt.no_OLD
 Then:
 
 ```bash
-git clone /path/to/2026-11-14_bengt-no-site_v3.bundle bengt.no
+git clone /path/to/bengt-no-site.bundle bengt.no      # the newest delivered bundle file
 cd bengt.no
 git remote set-url origin https://github.com/bgronas/bengt.no.git
 ./publish.sh setup          # locked dependencies, Hugo, the Blowfish submodule from GitHub, then doctor
